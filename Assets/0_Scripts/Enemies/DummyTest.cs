@@ -2,13 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseEnemy : MonoBehaviour, IEntity
+public class DummyTest : MonoBehaviour, IEntity
 {
-    [Header("Base Properties")] [SerializeField]
-    protected float _hp;
-    [SerializeField] protected Animator _animator;
+    private float _hp = 15f;
 
-    public Vector3 Position { get; }
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+    }
 
     public float Health
     {
@@ -32,17 +36,14 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
 
     public bool IsEnemy
     {
-        get
-        {
-            return true;
-        }
+        get { return false; }
     }
-
 
     public void TakeDamage(float damage)
     {
         _hp -= damage;
+        
+        if(_hp <= 0)
+            Destroy(gameObject);
     }
-
-    public abstract void Attack();
 }

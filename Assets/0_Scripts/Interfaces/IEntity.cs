@@ -6,4 +6,5 @@ public interface IEntity
     public float Health { get; set; }
     public GameObject myGameObject { get; }
     public bool IsEnemy { get; }
+    public void TakeDamage(float damage);
 }

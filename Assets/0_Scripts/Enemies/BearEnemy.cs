@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 public class BearEnemy : BaseEnemy
 {
     [Header("Idle Properties")] 
-    private GameObject _target;
+    private IEntity _target;
     [SerializeField] private float searchRange; //TODO: hacer con Spatial Grid
     
     [Header("Move Properties")] 
@@ -24,6 +24,11 @@ public class BearEnemy : BaseEnemy
 
     public enum BearInputs { IDLE, MOVE, ATTACK, DIE }
     private EventFSM<BearInputs> _fsm;
+
+    private void Start()
+    {
+        SetupFSMStates();
+    }
 
     void SetupFSMStates()
     {
@@ -65,6 +70,11 @@ public class BearEnemy : BaseEnemy
             _target = FindNearestTarget(transform.position);
         };
 
+        idle.OnUpdate += () =>
+        {
+            _fsm.SendInput(BearInputs.MOVE);
+        };
+
         #endregion
 
         #region MOVE
@@ -84,18 +94,19 @@ public class BearEnemy : BaseEnemy
 
             if (_target == null)
             {
+                Debug.Log("NULLLLLL");
                 _fsm.SendInput(BearInputs.IDLE);
                 return;
             }
 
-            if (Vector3.Distance(_target.transform.position, transform.position) <= _minAttackRange)
+            if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
             {
                 _fsm.SendInput(BearInputs.ATTACK);
                 return;
             }
 
-            transform.forward = _target.transform.position - transform.position;
-            transform.forward = new Vector3(transform.forward.x, transform.position.y, transform.forward.z);
+            transform.forward = _target.Position - transform.position;
+            transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z);
 
             transform.position += transform.forward * _speed * Time.deltaTime;
         };
@@ -128,7 +139,7 @@ public class BearEnemy : BaseEnemy
                 return;
             }
 
-            if (Vector3.Distance(_target.transform.position, transform.position) >= _minAttackRange)
+            if (Vector3.Distance(_target.Position, transform.position) >= _minAttackRange)
             {
                 _fsm.SendInput(BearInputs.MOVE);
                 return;
@@ -162,28 +173,46 @@ public class BearEnemy : BaseEnemy
         
         _fsm = new EventFSM<BearInputs>(idle);
     }
-    
-    public void TakeDamage(float damage)
+
+    private void Update()
     {
-        _hp -= damage;
+        _fsm.Update();
     }
 
     public override void Attack()
     {
-        int rand = Random.Range(0, 4);
-        _animator.Play("Bear_Attack" + rand);
+        StopCoroutine(AttackCoroutine());
+        StartCoroutine(AttackCoroutine());
     }
 
-    GameObject FindNearestTarget(Vector3 position)
+    public IEnumerator AttackCoroutine()
+    {
+        int rand = Random.Range(1, 5);
+        _animator.Play("Bear_Attack" + rand);
+
+        yield return new WaitForSeconds(1f);
+        
+        _target.TakeDamage(_attackValue);
+        _target = null;
+        
+        yield return null;
+    }
+
+    IEntity FindNearestTarget(Vector3 position)
     {
         //TODO: hacer con Query
 
-        var nearestEntity = Physics.OverlapSphere(transform.position, searchRange)
-            .Select(x => x.gameObject.GetComponent<IEntity>())
-            .Where(x => x != null && !x.IsEnemy)
-            .OrderByDescending(x => Vector3.Distance(x.Position, transform.position))
-            .FirstOrDefault();
+        var objectsInRange = Physics.OverlapSphere(transform.position, searchRange);
 
-        return nearestEntity.myGameObject;
+        var finalEntity = objectsInRange.Aggregate(FList.Create<IEntity>(), (flist, listObject) =>
+        {
+            listObject.TryGetComponent(out IEntity entity);
+            
+            flist = entity != null ? flist + entity : flist;
+            return flist;
+        }).OrderBy(x => Vector3.Distance(x.Position, transform.position)).FirstOrDefault();
+
+        return finalEntity;
+
     }
 }
