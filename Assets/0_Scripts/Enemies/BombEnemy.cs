@@ -1,13 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using IA2;
 using UnityEngine.Serialization;
-using Random = UnityEngine.Random;
 
-public class BearEnemy : BaseEnemy
+public class BombEnemy : BaseEnemy
 {
     [Header("Idle Properties")] 
     private IEntity _target;
@@ -20,9 +17,10 @@ public class BearEnemy : BaseEnemy
     [SerializeField] private float _attackCooldown = 1.5f;
     private float _currentAttackCooldown = 0f;
     [SerializeField] private float _minAttackRange;
+    [SerializeField] private GameObject _bombPrefab;
 
-    public enum BearInputs { IDLE, MOVE, ATTACK, DIE }
-    private EventFSM<BearInputs> _fsm;
+    public enum BombInputs { IDLE, MOVE, PREPARE_LAUNCH, SHOOT, DIE }
+    private EventFSM<BombInputs> _fsm;
 
     private void Start()
     {
@@ -33,26 +31,34 @@ public class BearEnemy : BaseEnemy
     {
         #region DECLARATIONS
         
-        var idle = new State<BearInputs>("IDLE");
-        var move = new State<BearInputs>("MOVE");
-        var attack = new State<BearInputs>("ATTACK");
-        var die = new State<BearInputs>("DIE");
+        var idle = new State<BombInputs>("IDLE");
+        var move = new State<BombInputs>("MOVE");
+        var launch = new State<BombInputs>("PREPARE_LAUNCH");
+        var shoot = new State<BombInputs>("SHOOT");
+        var die = new State<BombInputs>("DIE");
         
         StateConfigurer.Create(idle)
-            .SetTransition(BearInputs.MOVE, move)
-            .SetTransition(BearInputs.ATTACK, attack)
-            .SetTransition(BearInputs.DIE, die)
+            .SetTransition(BombInputs.MOVE, move)
+            .SetTransition(BombInputs.PREPARE_LAUNCH, launch)
+            .SetTransition(BombInputs.DIE, die)
             .Done();
         
         StateConfigurer.Create(move)
-            .SetTransition(BearInputs.IDLE, idle)
-            .SetTransition(BearInputs.ATTACK, attack)
-            .SetTransition(BearInputs.DIE, die)
+            .SetTransition(BombInputs.IDLE, idle)
+            .SetTransition(BombInputs.PREPARE_LAUNCH, launch)
+            .SetTransition(BombInputs.DIE, die)
+            .Done();
+
+        StateConfigurer.Create(launch)
+            .SetTransition(BombInputs.IDLE, idle)
+            .SetTransition(BombInputs.SHOOT, shoot)
+            .SetTransition(BombInputs.DIE, die)
             .Done();
         
-        StateConfigurer.Create(attack)
-            .SetTransition(BearInputs.IDLE, idle)
-            .SetTransition(BearInputs.DIE, die)
+        StateConfigurer.Create(shoot)
+            .SetTransition(BombInputs.IDLE, idle)
+            .SetTransition(BombInputs.PREPARE_LAUNCH, launch)
+            .SetTransition(BombInputs.DIE, die)
             .Done();
         
         StateConfigurer.Create(die)
@@ -71,7 +77,7 @@ public class BearEnemy : BaseEnemy
 
         idle.OnUpdate += () =>
         {
-            _fsm.SendInput(BearInputs.MOVE);
+            _fsm.SendInput(BombInputs.MOVE);
         };
 
         #endregion
@@ -87,20 +93,20 @@ public class BearEnemy : BaseEnemy
         {
             if (_hp <= 0)
             {
-                _fsm.SendInput(BearInputs.DIE);
+                _fsm.SendInput(BombInputs.DIE);
                 return;
             }
 
             if (_target == null)
             {
                 Debug.Log("NULLLLLL");
-                _fsm.SendInput(BearInputs.IDLE);
+                _fsm.SendInput(BombInputs.IDLE);
                 return;
             }
 
             if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
             {
-                _fsm.SendInput(BearInputs.ATTACK);
+                _fsm.SendInput(BombInputs.PREPARE_LAUNCH);
                 return;
             }
 
@@ -117,44 +123,47 @@ public class BearEnemy : BaseEnemy
 
         #endregion
 
-        #region ATTACK
-
-        attack.OnEnter += x =>
+        #region PREPARE_LAUNCH
+        
+        launch.OnEnter += x =>
         {
-            _currentAttackCooldown = 0f;
+            _currentAttackCooldown = _attackCooldown;
         };
-
-        attack.OnUpdate += () =>
+        
+        launch.OnUpdate += () =>
         {
+            _currentAttackCooldown -= Time.deltaTime;
+            transform.LookAt(new Vector3(_target.Position.x, transform.position.y, _target.Position.z));
+            
             if (_hp <= 0)
             {
-                _fsm.SendInput(BearInputs.DIE);
+                _fsm.SendInput(BombInputs.DIE);
                 return;
             }
 
             if (_target == null)
             {
-                _fsm.SendInput(BearInputs.IDLE);
+                Debug.Log("NULLLLLL");
+                _fsm.SendInput(BombInputs.IDLE);
                 return;
             }
-
-            if (Vector3.Distance(_target.Position, transform.position) >= _minAttackRange)
-            {
-                _fsm.SendInput(BearInputs.MOVE);
-                return;
-            }
-
-            _currentAttackCooldown -= Time.deltaTime;
-            if (_currentAttackCooldown >= 0) return;
             
-            Attack();
-            _currentAttackCooldown = _attackCooldown;
+            if (_currentAttackCooldown >= 0) return;
+            _fsm.SendInput(BombInputs.SHOOT);
         };
 
-        attack.OnExit += x =>
+        #endregion
+        
+        #region SHOOT
+
+        shoot.OnEnter += x =>
+        {
+            Attack();
+        };
+
+        shoot.OnExit += x =>
         {
             _animator.Play("Movement");
-            _currentAttackCooldown = 0f;
         };
 
         #endregion
@@ -170,7 +179,7 @@ public class BearEnemy : BaseEnemy
 
         #endregion
         
-        _fsm = new EventFSM<BearInputs>(idle);
+        _fsm = new EventFSM<BombInputs>(idle);
     }
 
     private void Update()
@@ -188,11 +197,13 @@ public class BearEnemy : BaseEnemy
     {
         int rand = Random.Range(1, 5);
         _animator.Play("Bear_Attack" + rand);
-
-        yield return new WaitForSeconds(1f);
         
-        _target.TakeDamage(_attackValue);
-        _target = null;
+        var bomb = Instantiate(_bombPrefab);
+        bomb.GetComponent<BombLogic>().target = _target.Position;
+        
+        yield return new WaitForSeconds(2f);
+        
+        _fsm.SendInput(BombInputs.IDLE);
         
         yield return null;
     }
