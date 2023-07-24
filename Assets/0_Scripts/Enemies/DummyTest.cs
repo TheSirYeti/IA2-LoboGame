@@ -43,9 +43,11 @@ public class DummyTest : MonoBehaviour, IEntity
     public void TakeDamage(float damage)
     {
         _hp -= damage;
-        
-        if(_hp <= 0)
-            Destroy(gameObject);
+
+        if (_hp <= 0)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     private bool isInGrid = false;
