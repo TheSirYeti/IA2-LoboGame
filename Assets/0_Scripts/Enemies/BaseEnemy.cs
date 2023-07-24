@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -62,6 +63,21 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
     {
         _hp -= damage;
     }
+
+    private bool isInGrid = false;
+    public bool onGrid
+    {
+        get
+        {
+            return isInGrid;
+        }
+        set
+        {
+            isInGrid = value;
+        }
+    }
+
+    public event Action<IEntity> OnMove = delegate {};
 
     public abstract void Attack();
 }

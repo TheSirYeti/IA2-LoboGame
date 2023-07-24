@@ -6,6 +6,8 @@ using System;
 
 public class SpatialGrid : MonoBehaviour
 {
+    public static SpatialGrid instance;
+    
     #region Variables
     
     public float x;
@@ -15,28 +17,30 @@ public class SpatialGrid : MonoBehaviour
     public int width;
     public int height;
     
-    private Dictionary<GridEntity, Tuple<int, int>> lastPositions;
-    private HashSet<GridEntity>[,] buckets;
+    private Dictionary<IEntity, Tuple<int, int>> lastPositions;
+    private HashSet<IEntity>[,] buckets;
 
 
     readonly public Tuple<int, int> Outside = Tuple.Create(-1, -1);
 
     //Una colección vacía a devolver en las queries si no hay nada que devolver
-    readonly public GridEntity[] Empty = new GridEntity[0];
+    readonly public IEntity[] Empty = new IEntity[0];
     #endregion
 
     #region FUNCIONES
     private void Awake()
     {
-        lastPositions = new Dictionary<GridEntity, Tuple<int, int>>();
-        buckets = new HashSet<GridEntity>[width, height];
+        instance = this;
+        
+        lastPositions = new Dictionary<IEntity, Tuple<int, int>>();
+        buckets = new HashSet<IEntity>[width, height];
         
         for (int i = 0; i < width; i++)
             for (int j = 0; j < height; j++)
-                buckets[i, j] = new HashSet<GridEntity>();
+                buckets[i, j] = new HashSet<IEntity>();
         
         var ents = RecursiveWalker(transform)
-            .Select(x => x.GetComponent<GridEntity>())
+            .Select(x => x.GetComponent<IEntity>())
             .Where(x => x != null);
 
         foreach (var e in ents)
@@ -46,10 +50,10 @@ public class SpatialGrid : MonoBehaviour
         }
     }
 
-    public void UpdateEntity(GridEntity entity)
+    public void UpdateEntity(IEntity entity)
     {
         var lastPos = lastPositions.ContainsKey(entity) ? lastPositions[entity] : Outside;
-        var currentPos = GetPositionInGrid(entity.gameObject.transform.position);
+        var currentPos = GetPositionInGrid(entity.myGameObject.transform.position);
         
         if (lastPos.Equals(currentPos))
             return;
@@ -66,7 +70,7 @@ public class SpatialGrid : MonoBehaviour
             lastPositions.Remove(entity);
     }
 
-    public IEnumerable<GridEntity> Query(Vector3 aabbFrom, Vector3 aabbTo, Func<Vector3, bool> filterByPosition)
+    public IEnumerable<IEntity> Query(Vector3 aabbFrom, Vector3 aabbTo, Func<Vector3, bool> filterByPosition)
     {
         var from = new Vector3(Mathf.Min(aabbFrom.x, aabbTo.x), 0, Mathf.Min(aabbFrom.z, aabbTo.z));
         var to = new Vector3(Mathf.Max(aabbFrom.x, aabbTo.x), 0, Mathf.Max(aabbFrom.z, aabbTo.z));
@@ -95,9 +99,9 @@ public class SpatialGrid : MonoBehaviour
         return cells
             .SelectMany(cell => buckets[cell.Item1, cell.Item2])
             .Where(e =>
-                from.x <= e.transform.position.x && e.transform.position.x <= to.x &&
-                from.z <= e.transform.position.z && e.transform.position.z <= to.z
-            ).Where(x => filterByPosition(x.transform.position));
+                from.x <= e.Position.x && e.Position.x <= to.x &&
+                from.z <= e.Position.z && e.Position.z <= to.z
+            ).Where(x => filterByPosition(x.Position));
     }
 
     public Tuple<int, int> GetPositionInGrid(Vector3 pos)
@@ -114,7 +118,7 @@ public class SpatialGrid : MonoBehaviour
 
     void OnDestroy()
     {
-        var ents = RecursiveWalker(transform).Select(x => x.GetComponent<GridEntity>()).Where(x => x != null);
+        var ents = RecursiveWalker(transform).Select(x => x.GetComponent<IEntity>()).Where(x => x != null);
         foreach (var e in ents)
             e.OnMove -= UpdateEntity;
     }
@@ -172,7 +176,7 @@ public class SpatialGrid : MonoBehaviour
         
         if (!activatedGrid)
         {
-            IEnumerable<GridEntity> allElems = Enumerable.Empty<GridEntity>();
+            IEnumerable<IEntity> allElems = Enumerable.Empty<IEntity>();
             foreach(var elem in buckets)
                 allElems = allElems.Concat(elem);
 
@@ -181,7 +185,7 @@ public class SpatialGrid : MonoBehaviour
             {
                 foreach(var neighbour in allElems.Where(x => x != ent))
                 {
-                    Gizmos.DrawLine(ent.transform.position, neighbour.transform.position);
+                    Gizmos.DrawLine(ent.Position, neighbour.Position);
                     connections++;
                 }
                 if(showLogs)
@@ -199,7 +203,7 @@ public class SpatialGrid : MonoBehaviour
 
     //IA2-P2
     
-    public IEnumerable<HashSet<GridEntity>> GetHashValues()
+    public IEnumerable<HashSet<IEntity>> GetHashValues()
     {
         foreach (var ent in buckets)
         {
@@ -208,7 +212,7 @@ public class SpatialGrid : MonoBehaviour
     }
 
 
-    public HashSet<GridEntity> GetBucket(Tuple<int, int> index)
+    public HashSet<IEntity> GetBucket(Tuple<int, int> index)
     {
         if (IsInsideGrid(index))
             return buckets[index.Item1, index.Item2];

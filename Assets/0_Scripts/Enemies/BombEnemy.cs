@@ -200,7 +200,7 @@ public class BombEnemy : BaseEnemy
         
         var bomb = Instantiate(_bombPrefab);
         bomb.GetComponent<BombLogic>().target = _target.Position;
-        
+
         yield return new WaitForSeconds(2f);
         
         _fsm.SendInput(BombInputs.IDLE);

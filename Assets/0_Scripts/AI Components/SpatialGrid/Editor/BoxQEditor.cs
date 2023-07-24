@@ -24,7 +24,7 @@ public class BoxQEditor : Editor
         GUI.color = Color.red;
         foreach(var elem in _target.selected)
         {
-            var p = Camera.current.WorldToScreenPoint(elem.transform.position);
+            var p = Camera.current.WorldToScreenPoint(elem.Position);
             GUI.Label(new Rect(p.x - 5, Screen.height - p.y - 50, 50, 100), ":)", style);
         }
         Handles.EndGUI();

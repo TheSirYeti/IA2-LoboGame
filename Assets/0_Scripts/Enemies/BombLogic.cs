@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -8,13 +9,19 @@ public class BombLogic : MonoBehaviour
     public Vector3 target;
     
     [SerializeField] private float _speed;
+    [SerializeField] private float _damage;
     [SerializeField] private float _arcHeight;
     [SerializeField] private float _stepScale;
     
     Vector3 _startPosition;
     float _progress;
 
-    void Start() {
+    [SerializeField] private Queries query;
+
+    void Start()
+    {
+        query.targetGrid = SpatialGrid.instance;
+        
         _startPosition = transform.position;
         float distance = Vector3.Distance(_startPosition, target);
         
@@ -30,7 +37,17 @@ public class BombLogic : MonoBehaviour
         transform.LookAt(nextPos, transform.forward);
         transform.position = nextPos;
         
-        if (_progress == 1.0f) ;
-            //Cosas
+        if (_progress == 1.0f)
+        {
+            var entities = query.Query();
+            Debug.Log(entities.Count());
+
+            foreach (var ent in entities)
+            {
+                ent.TakeDamage(_damage);
+            }
+            
+            Destroy(gameObject);
+        }
     }
 }

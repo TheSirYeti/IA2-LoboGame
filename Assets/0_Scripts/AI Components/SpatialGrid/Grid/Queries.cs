@@ -10,9 +10,9 @@ public class Queries : MonoBehaviour
     public SpatialGrid targetGrid;
     public float width = 15f;
     public float height = 30f;
-    public IEnumerable<GridEntity> selected = new List<GridEntity>();
+    public IEnumerable<IEntity> selected = new List<IEntity>();
 
-    public IEnumerable<GridEntity> Query()
+    public IEnumerable<IEntity> Query()
     {
         if (isBox)
         {
@@ -58,7 +58,7 @@ public class Queries : MonoBehaviour
         if (Application.isPlaying)
         {
             selected = Query();
-            var temp = FindObjectsOfType<GridEntity>().Where(x=>!selected.Contains(x));
+            var temp = FindObjectsOfType<MonoBehaviour>().OfType<IEntity>().Where(x=>!selected.Contains(x));
             foreach (var item in temp)
             {
                 item.onGrid = false;

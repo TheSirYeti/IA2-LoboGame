@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -46,4 +47,19 @@ public class DummyTest : MonoBehaviour, IEntity
         if(_hp <= 0)
             Destroy(gameObject);
     }
+
+    private bool isInGrid = false;
+    public bool onGrid
+    {
+        get
+        {
+            return isInGrid;
+        }
+        set
+        {
+            isInGrid = value;
+        }
+    }
+
+    public event Action<IEntity> OnMove = delegate {};
 }
