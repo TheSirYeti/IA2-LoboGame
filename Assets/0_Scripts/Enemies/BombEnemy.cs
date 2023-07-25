@@ -199,6 +199,7 @@ public class BombEnemy : BaseEnemy
         _animator.Play("Bear_Attack" + rand);
         
         var bomb = Instantiate(_bombPrefab);
+        bomb.transform.position = transform.position;
         bomb.GetComponent<BombLogic>().target = _target.Position;
 
         yield return new WaitForSeconds(2f);

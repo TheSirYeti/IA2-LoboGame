@@ -37,11 +37,13 @@ public class BombLogic : MonoBehaviour
         transform.LookAt(nextPos, transform.forward);
         transform.position = nextPos;
         
-        if (_progress == 1.0f)
+        if (_progress >= 1.0f)
         {
-            var entities = query.Query();
+            var entities = query.Query().Where(x => !x.IsEnemy);
             Debug.Log(entities.Count());
 
+            if (!entities.Any()) return;
+            
             foreach (var ent in entities)
             {
                 ent.TakeDamage(_damage);

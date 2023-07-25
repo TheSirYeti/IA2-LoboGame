@@ -1092,7 +1092,7 @@ MonoBehaviour:
   _speed: 10
   _attackValue: 5
   _attackCooldown: 1.5
-  _minAttackRange: 30
+  _minAttackRange: 10
   _bombPrefab: {fileID: 7005198195755114904, guid: d5677766981b6904d918439cf81ed31d, type: 3}
 --- !u!1001 &269322596
 PrefabInstance:
