@@ -156,7 +156,6 @@ public class Archer : MonoBehaviour
         {
             if (!isPanic)
             {
-                _reloadingArrows = ArrowsRefilling(_auxArrowsList).ToList();
                 SendInputToFSM(PlayerInputs.RELOAD);
             }
         };
@@ -216,19 +215,6 @@ public class Archer : MonoBehaviour
     {
         var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, transform.rotation);
         _arrows = DecreasingAmmo(_arrows, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
-    }
-
-
-    //Refill flechas esta funcion la tengo que pasar al que refillea las flechas justamente
-
-    public IEnumerable<Arrows> ArrowsRefilling(List<Arrows> arrows)
-    {
-        var myCol = arrows.Aggregate(new List<Arrows>(), (acum, current) =>
-        {
-            acum.Add(current);
-            return acum;
-        });
-        return myCol;
     }
 
 }
