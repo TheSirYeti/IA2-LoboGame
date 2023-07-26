@@ -15,10 +15,11 @@ public class Arrows : MonoBehaviour
     }
     void Start()
     {
-        dirX = Random.Range(-.9f, .9f);
-        dirY = Random.Range(.5f, 1.2f);
+        dirX = Random.Range(-.4f, .4f);
+        dirY = Random.Range(.5f, 1f);
         dirZ = Random.Range(1f, 3f);
         _dir = new Vector3(dirX, dirY, dirZ);
+        transform.forward = _dir;
         _rb.AddForce(_dir * _arrowSpeed, ForceMode.Acceleration);
     }
 }

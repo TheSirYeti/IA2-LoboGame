@@ -20,6 +20,7 @@ public class Archer : MonoBehaviour
     [Header("ReloadState")]
     [SerializeField] private float _reloadCd;//Cd after shooting
     private float _reloadCounter;
+    [SerializeField] GameObject _bow, _reloadQuiver, _quiver;
 
     [Header("AttackState")]
 
@@ -106,6 +107,9 @@ public class Archer : MonoBehaviour
         {
             _anim.Play("Reload");
             _reloadCounter = _reloadCd;
+            _bow.SetActive(false);
+            _reloadQuiver.SetActive(true);
+            _quiver.SetActive(false);
         };
 
         reloading.OnUpdate += () =>
@@ -128,6 +132,9 @@ public class Archer : MonoBehaviour
 
         reloading.OnExit += x =>
         {
+            _bow.SetActive(true);
+            _reloadQuiver.SetActive(false);
+            _quiver.SetActive(true);
         };
 
         //Attacking
@@ -140,26 +147,12 @@ public class Archer : MonoBehaviour
                 SendInputToFSM(PlayerInputs.RELOAD);
 
             _attackCdCounter = _attackCd;
-
-            
+            _anim.Play("Fire");
 
         };
 
         attacking.OnUpdate += () =>
         {
-            _attackCdCounter -= Time.deltaTime;
-            if (_attackCdCounter < 0)
-            {
-                
-                if (!_arrows.Any())
-                    SendInputToFSM(PlayerInputs.RELOAD);
-                else
-                {
-                    Shooting();
-                    
-                }
-                    
-            }
 
 
         };
@@ -233,23 +226,17 @@ public class Archer : MonoBehaviour
         return myCol;
     }
 
-    //Shooting
-    public void Shooting()
+    public void Shoot()
     {
-        _anim.Play("Fire");
+        if (!_arrows.Any())
+            SendInputToFSM(PlayerInputs.RELOAD);
+        else
+        {
+            var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, transform.rotation);
+            _arrows = DecreasingAmmo(_arrows, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
 
-        StartCoroutine(ShootingCd());
-
-        var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, transform.rotation);
-        _arrows = DecreasingAmmo(_arrows, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
-
-        SendInputToFSM(PlayerInputs.ATTACK);
-
-    }
-
-    IEnumerator ShootingCd()
-    {
-        yield return new WaitForSeconds(2);
+            SendInputToFSM(PlayerInputs.ATTACK);
+        }
     }
 
     public void TestReload()
