@@ -11,10 +11,15 @@ public class Archer : MonoBehaviour
     public enum PlayerInputs { RELOAD, IDLE, ATTACK, DIE, PANIC }
     private EventFSM<PlayerInputs> _myFsm;
 
+    [SerializeField] Animator _anim;
 
     [Header("IdleState")]
     [SerializeField] float _restingTime; //time spent in idle
     private float _restingTimeCounter; //counter
+
+    [Header("ReloadState")]
+    [SerializeField] private float _reloadCd;//Cd after shooting
+    private float _reloadCounter;
 
     [Header("AttackState")]
 
@@ -29,6 +34,8 @@ public class Archer : MonoBehaviour
 
     [SerializeField] private float _attackCd;//Cd after shooting
     private float _attackCdCounter;
+
+
 
     public bool isPanic;
 
@@ -53,7 +60,7 @@ public class Archer : MonoBehaviour
         StateConfigurer.Create(reloading)
             .SetTransition(PlayerInputs.DIE, dying)
             .SetTransition(PlayerInputs.PANIC, panic)
-            .SetTransition(PlayerInputs.IDLE, idle)
+            .SetTransition(PlayerInputs.ATTACK, attacking)
             .Done();
 
 
@@ -77,7 +84,7 @@ public class Archer : MonoBehaviour
 
         idle.OnEnter += x =>
         {
-            _restingTime = UnityEngine.Random.Range(1, 3);
+            _anim.Play("Idle");
             _restingTimeCounter = _restingTime;
             Debug.Log("entre a idle");
         };
@@ -97,17 +104,25 @@ public class Archer : MonoBehaviour
         //se encarga de recargar desde _reloadingArrows.
         reloading.OnEnter += x =>
         {
-            Debug.Log("entre a reload");
-            //Cuando recargo vuelvo a generar mi lista con flechas y ammo.
-            if (_reloadingArrows.Any())
-            {
-                _arrows = ArrowsCounter(_reloadingArrows).ToList();
-                Debug.Log(_reloadingArrows.Count());
-                _reloadingArrows = DecreasingAmmo(_reloadingArrows, 5).ToList();
-                SendInputToFSM(PlayerInputs.IDLE);
-            }
-            else SendInputToFSM(PlayerInputs.PANIC);
+            _anim.Play("Reload");
+            _reloadCounter = _reloadCd;
+        };
 
+        reloading.OnUpdate += () =>
+        {
+            _reloadCounter -= Time.deltaTime;
+
+            if (_reloadCounter < 0)
+            {
+                if (_reloadingArrows.Any())
+                {
+                    _arrows = ArrowsCounter(_reloadingArrows).ToList();
+                    Debug.Log(_reloadingArrows.Count());
+                    _reloadingArrows = DecreasingAmmo(_reloadingArrows, 5).ToList();
+                    SendInputToFSM(PlayerInputs.ATTACK);
+                }
+                else SendInputToFSM(PlayerInputs.PANIC);
+            }
 
         };
 
@@ -119,12 +134,14 @@ public class Archer : MonoBehaviour
         attacking.OnEnter += x =>
         {
             Debug.Log("entre a attack");
+            
             //Cada vez que ataco, elimino las flechas
             if (!_arrows.Any())
                 SendInputToFSM(PlayerInputs.RELOAD);
 
             _attackCdCounter = _attackCd;
-            Shooting();
+
+            
 
         };
 
@@ -133,10 +150,15 @@ public class Archer : MonoBehaviour
             _attackCdCounter -= Time.deltaTime;
             if (_attackCdCounter < 0)
             {
+                
                 if (!_arrows.Any())
                     SendInputToFSM(PlayerInputs.RELOAD);
                 else
-                    SendInputToFSM(PlayerInputs.ATTACK);
+                {
+                    Shooting();
+                    
+                }
+                    
             }
 
 
@@ -149,6 +171,7 @@ public class Archer : MonoBehaviour
 
         panic.OnEnter += x =>
         {
+            _anim.Play("Panic");
             isPanic = true;
         };
 
@@ -213,8 +236,31 @@ public class Archer : MonoBehaviour
     //Shooting
     public void Shooting()
     {
+        _anim.Play("Fire");
+
+        StartCoroutine(ShootingCd());
+
         var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, transform.rotation);
         _arrows = DecreasingAmmo(_arrows, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
+
+        SendInputToFSM(PlayerInputs.ATTACK);
+
     }
 
+    IEnumerator ShootingCd()
+    {
+        yield return new WaitForSeconds(2);
+    }
+
+    public void TestReload()
+    {
+        if (_reloadingArrows.Any())
+        {
+            _arrows = ArrowsCounter(_reloadingArrows).ToList();
+            Debug.Log(_reloadingArrows.Count());
+            _reloadingArrows = DecreasingAmmo(_reloadingArrows, 5).ToList();
+            SendInputToFSM(PlayerInputs.IDLE);
+        }
+        else SendInputToFSM(PlayerInputs.PANIC);
+    }
 }
