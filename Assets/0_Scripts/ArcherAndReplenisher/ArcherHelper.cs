@@ -12,7 +12,9 @@ public class ArcherHelper : MonoBehaviour
     private EventFSM<PlayerInputs> _myFsm;
 
     [SerializeField] Archer _myArcher;
+    [SerializeField] Animator _anim;
 
+    [SerializeField] GameObject _reloadQuiver, _craftQuiver, _hammer;
 
 
     [Header("DeliverState")]
@@ -81,7 +83,7 @@ public class ArcherHelper : MonoBehaviour
 
         idle.OnUpdate += () =>
         {
-            Debug.Log("enter idle");
+            _anim.Play("Idle");
             Debug.Log(_myArcher.isPanic);
             if (_myArcher.isPanic)
             {
@@ -99,12 +101,22 @@ public class ArcherHelper : MonoBehaviour
 
         //Estado de recarga: El arquero no tiene mas flechas por lo tanto
         //se encarga de recargar desde _reloadingArrows.
+        delivering.OnEnter += x =>
+        {
+            _craftQuiver.SetActive(false);
+            if(_isDelivering)
+                _reloadQuiver.SetActive(true);
+            else _reloadQuiver.SetActive(false);
+
+        };
 
         delivering.OnFixedUpdate += () =>
         {
+            _anim.Play("Run");
             Debug.Log("enter delivery");
             if (_isDelivering) //Si hace deliver entonces esta yendo
             {
+                
                 Vector3 dir = _deliverPos.transform.position - transform.position;
                 transform.forward = dir;
                 transform.position += transform.forward * _moveSpeed * Time.deltaTime;
@@ -113,6 +125,7 @@ public class ArcherHelper : MonoBehaviour
                 {
                     SendInputToFSM(PlayerInputs.REFILL);
                 }
+                
             }
             else //Si no esta haciendo deliver significa que esta volviendo basicamente y cuando llega va a craft
             {
@@ -137,6 +150,7 @@ public class ArcherHelper : MonoBehaviour
         //Le hace refill a las flechas del arquero que tiene guardadas
         refilling.OnEnter += x =>
         {
+            _anim.Play("Throw");
             Debug.Log("enter refill");
             _isDelivering = false;
             //Hago un concat entre las flechas que tenga en el reloading en este momento y las flechas que craftie
@@ -172,6 +186,8 @@ public class ArcherHelper : MonoBehaviour
 
             //Crafting Time
             _craftCounter = _craftTime;
+            _anim.Play("Hammer");
+            _hammer.SetActive(true);
 
         };
 
@@ -187,7 +203,8 @@ public class ArcherHelper : MonoBehaviour
 
         crafting.OnExit += x =>
         {
-
+            _hammer.SetActive(false);
+            _craftQuiver.SetActive(true);
         };
 
 
