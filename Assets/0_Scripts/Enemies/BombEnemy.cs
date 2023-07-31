@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using IA2;
 using UnityEngine.Serialization;
@@ -19,7 +20,7 @@ public class BombEnemy : BaseEnemy
     [SerializeField] private float _minAttackRange;
     [SerializeField] private GameObject _bombPrefab;
 
-    public enum BombInputs { IDLE, MOVE, PREPARE_LAUNCH, SHOOT, DIE }
+    public enum BombInputs { IDLE, MOVE, PATHFIND, PREPARE_LAUNCH, SHOOT, DIE }
     private EventFSM<BombInputs> _fsm;
 
     private void Start()
@@ -33,6 +34,7 @@ public class BombEnemy : BaseEnemy
         
         var idle = new State<BombInputs>("IDLE");
         var move = new State<BombInputs>("MOVE");
+        var pathfind = new State<BombInputs>("PATHFIND");
         var launch = new State<BombInputs>("PREPARE_LAUNCH");
         var shoot = new State<BombInputs>("SHOOT");
         var die = new State<BombInputs>("DIE");
@@ -46,6 +48,14 @@ public class BombEnemy : BaseEnemy
         StateConfigurer.Create(move)
             .SetTransition(BombInputs.IDLE, idle)
             .SetTransition(BombInputs.PREPARE_LAUNCH, launch)
+            .SetTransition(BombInputs.PATHFIND, pathfind)
+            .SetTransition(BombInputs.DIE, die)
+            .Done();
+        
+        StateConfigurer.Create(pathfind)
+            .SetTransition(BombInputs.IDLE, idle)
+            .SetTransition(BombInputs.PREPARE_LAUNCH, launch)
+            .SetTransition(BombInputs.MOVE, move)
             .SetTransition(BombInputs.DIE, die)
             .Done();
 
@@ -91,6 +101,7 @@ public class BombEnemy : BaseEnemy
         
         move.OnUpdate += () =>
         {
+            Debug.Log("MOVE?");
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);
@@ -104,6 +115,12 @@ public class BombEnemy : BaseEnemy
                 return;
             }
 
+            if (!InSight(_target.Position, transform.position))
+            {
+                _fsm.SendInput(BombInputs.PATHFIND);
+                return;
+            }
+            
             if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
             {
                 _fsm.SendInput(BombInputs.PREPARE_LAUNCH);
@@ -119,6 +136,72 @@ public class BombEnemy : BaseEnemy
         move.OnExit += x =>
         {
             _animator.SetFloat("movementSpeed", 0);
+        };
+
+        #endregion
+        
+        #region PATHFIND
+
+        pathfind.OnEnter += x =>
+        {
+            int startNodeID = NodeManager.instance.GetClosestNode(transform);
+            int endNodeID = NodeManager.instance.GetClosestNode(_target.myGameObject.transform);
+            
+            CalculatePathfinding(NodeManager.instance.nodes[startNodeID],
+                NodeManager.instance.nodes[endNodeID]);
+            
+            if(currentPath == null || !currentPath.Any())
+                _fsm.SendInput(BombInputs.MOVE);
+        };
+
+        pathfind.OnUpdate += () =>
+        {
+            Debug.Log("PF");
+            
+            if (_hp <= 0)
+            {
+                _fsm.SendInput(BombInputs.DIE);
+                return;
+            }
+
+            if (_target == null)
+            {
+                _fsm.SendInput(BombInputs.IDLE);
+                return;
+            }
+
+            if (InSight(_target.Position, transform.position))
+            {
+                _fsm.SendInput(BombInputs.MOVE);
+                return;
+            }
+            
+            if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
+            {
+                _fsm.SendInput(BombInputs.PREPARE_LAUNCH);
+                return;
+            }
+            
+            transform.forward = currentPath[currentNode].transform.position - transform.position;
+            transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z);
+            
+            transform.position += transform.forward * _speed * Time.deltaTime;
+            
+            if (Vector3.Distance(transform.position, currentPath[currentNode].transform.position) <= minDistanceToNode)
+            {
+                currentNode++;
+
+                if (currentNode >= currentPath.Count)
+                {
+                    _fsm.SendInput(BombInputs.MOVE);
+                }
+            }
+        };
+
+        pathfind.OnExit += x =>
+        {
+            currentNode = 0;
+            currentPath = new List<Node>();
         };
 
         #endregion

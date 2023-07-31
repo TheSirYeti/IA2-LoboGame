@@ -21,7 +21,7 @@ public class BearEnemy : BaseEnemy
     private float _currentAttackCooldown = 0f;
     [SerializeField] private float _minAttackRange;
 
-    public enum BearInputs { IDLE, MOVE, ATTACK, DIE }
+    public enum BearInputs { IDLE, MOVE, PATHFIND, ATTACK, DIE }
     private EventFSM<BearInputs> _fsm;
 
     private void Start()
@@ -35,6 +35,7 @@ public class BearEnemy : BaseEnemy
         
         var idle = new State<BearInputs>("IDLE");
         var move = new State<BearInputs>("MOVE");
+        var pathfind = new State<BearInputs>("PATHFIND");
         var attack = new State<BearInputs>("ATTACK");
         var die = new State<BearInputs>("DIE");
         
@@ -47,6 +48,14 @@ public class BearEnemy : BaseEnemy
         StateConfigurer.Create(move)
             .SetTransition(BearInputs.IDLE, idle)
             .SetTransition(BearInputs.ATTACK, attack)
+            .SetTransition(BearInputs.PATHFIND, pathfind)
+            .SetTransition(BearInputs.DIE, die)
+            .Done();
+        
+        StateConfigurer.Create(pathfind)
+            .SetTransition(BearInputs.IDLE, idle)
+            .SetTransition(BearInputs.ATTACK, attack)
+            .SetTransition(BearInputs.MOVE, move)
             .SetTransition(BearInputs.DIE, die)
             .Done();
         
@@ -98,6 +107,12 @@ public class BearEnemy : BaseEnemy
                 return;
             }
 
+            if (!InSight(_target.Position, transform.position))
+            {
+                _fsm.SendInput(BearInputs.PATHFIND);
+                return;
+            }
+            
             if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
             {
                 _fsm.SendInput(BearInputs.ATTACK);
@@ -117,6 +132,72 @@ public class BearEnemy : BaseEnemy
 
         #endregion
 
+        #region PATHFIND
+
+        pathfind.OnEnter += x =>
+        {
+            int startNodeID = NodeManager.instance.GetClosestNode(transform);
+            int endNodeID = NodeManager.instance.GetClosestNode(_target.myGameObject.transform);
+            
+            CalculatePathfinding(NodeManager.instance.nodes[startNodeID],
+                NodeManager.instance.nodes[endNodeID]);
+            
+            if(currentPath == null || !currentPath.Any())
+                _fsm.SendInput(BearInputs.MOVE);
+        };
+
+        pathfind.OnUpdate += () =>
+        {
+            Debug.Log("PF");
+            
+            if (_hp <= 0)
+            {
+                _fsm.SendInput(BearInputs.DIE);
+                return;
+            }
+
+            if (_target == null)
+            {
+                _fsm.SendInput(BearInputs.IDLE);
+                return;
+            }
+
+            if (InSight(_target.Position, transform.position))
+            {
+                _fsm.SendInput(BearInputs.MOVE);
+                return;
+            }
+            
+            if (Vector3.Distance(_target.Position, transform.position) <= _minAttackRange)
+            {
+                _fsm.SendInput(BearInputs.ATTACK);
+                return;
+            }
+            
+            transform.forward = currentPath[currentNode].transform.position - transform.position;
+            transform.forward = new Vector3(transform.forward.x, 0, transform.forward.z);
+            
+            transform.position += transform.forward * _speed * Time.deltaTime;
+            
+            if (Vector3.Distance(transform.position, currentPath[currentNode].transform.position) <= minDistanceToNode)
+            {
+                currentNode++;
+
+                if (currentNode >= currentPath.Count)
+                {
+                    _fsm.SendInput(BearInputs.MOVE);
+                }
+            }
+        };
+
+        pathfind.OnExit += x =>
+        {
+            currentNode = 0;
+            currentPath = new List<Node>();
+        };
+
+        #endregion
+        
         #region ATTACK
 
         attack.OnEnter += x =>
@@ -135,6 +216,12 @@ public class BearEnemy : BaseEnemy
             if (_target == null)
             {
                 _fsm.SendInput(BearInputs.IDLE);
+                return;
+            }
+            
+            if (!InSight(_target.Position, transform.position))
+            {
+                _fsm.SendInput(BearInputs.PATHFIND);
                 return;
             }
 
