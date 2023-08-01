@@ -34,6 +34,12 @@ public class Bombarder : MonoBehaviour
 
     [Header("DestructionState")]
     [SerializeField] BaseEnemy _target;
+    [SerializeField] float _destructionSpeed;
+    [SerializeField] ParticleSystem _explosionParticles;
+    [SerializeField] GameObject _mesh;
+    [SerializeField] float _destroyCounter;
+
+    //[SerializeField] List<BaseEnemy> test = new List<BaseEnemy>();//Esta lista es para ver si el generator agarra bien
 
     private void Awake()
     {
@@ -110,16 +116,27 @@ public class Bombarder : MonoBehaviour
 
         destruct.OnEnter += x =>
         {
-            _target = TargetEnemy();
+            _target = TargetEnemy(PossibleTargets().ToList());
+            //test = PossibleTargets().ToList();
+            _destroyCounter = 3;
         };
 
         destruct.OnUpdate += () =>
         {
             Vector3 dir = _target.transform.position - transform.position;
             transform.forward = dir;
-            transform.position += transform.forward * _waypointSpeed * Time.deltaTime;
+            transform.position += transform.forward * _destructionSpeed * Time.deltaTime;
 
             if (dir.magnitude < 0.15f)
+            {
+                _destructionSpeed = 0;
+                _mesh.SetActive(false);
+                _explosionParticles.Play();
+                _destroyCounter -= Time.deltaTime;
+                
+            }
+
+            if (_destroyCounter <= 0)
                 Destroy(gameObject);
         };
 
@@ -144,16 +161,23 @@ public class Bombarder : MonoBehaviour
         //Creo la lista de safe waypoints
         safeWaypoints = SafeWaypoint(wpSafety).ToList();
 
+        //Carga las bombas
         _bombs = BombLoading(_bombPrefab, _bombsAmount).ToList();
 
-        //Way
+        //Wps
         allWaypoints = WpCreator(safeWaypoints).ToList();
-
     }
 
     private void Update()
     {
         _myFsm.Update();
+        
+    }
+
+    private void OnDrawGizmos() //Esfera de colision
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, 30);
     }
 
     private void FixedUpdate()
@@ -170,14 +194,7 @@ public class Bombarder : MonoBehaviour
     }
 
 
-    //Esta funcion toma tantas flechas como pueda de el arrowholder
-    //IEnumerable<Arrows> ArrowsCounter(List<Arrows> arrows)
-    //{
-    //    //var myCol = arrows.Take(_arrowsAmount);
-    //    //return myCol;
-    //}
-
-    //Esta funcion hace que cada vez que dispare pierda flechas
+    //Saca bombas
     IEnumerable<BombarderBbombs> DecreasingAmmo(List<BombarderBbombs> arrows, int ammo)
     {
         var myCol = arrows.Skip(ammo);
@@ -205,6 +222,19 @@ public class Bombarder : MonoBehaviour
         }
     }
 
+    //Generator lista de enemigos? masterclass?
+    public IEnumerable<BaseEnemy> PossibleTargets()
+    {
+        var sphere = Physics.OverlapSphere(transform.position, 30, 11); //Una esfera de colisiones
+
+        for (int i = 0; i < sphere.Length-1; i++)
+        {
+            var enemy = sphere[i].GetComponent<BaseEnemy>();
+            if (enemy != null) //Si el nodo no es si mismo, lo agrega al a lista de vecinos
+                yield return enemy;
+        }
+    }
+
 
     IEnumerable<Tuple<Waypoint, bool>> SafeWaypoint(WaypointSafety wpList)
     {
@@ -218,13 +248,9 @@ public class Bombarder : MonoBehaviour
 
 
 
-    BaseEnemy TargetEnemy()
+    BaseEnemy TargetEnemy(List<BaseEnemy> possibleTargets)
     {
-        var sphere = Physics.OverlapSphere(transform.position, 30, 11); //Una esfera de colisiones
-
-        var colTest = sphere.Select(x => x.GetComponent<BaseEnemy>());
-
-        var myCol = colTest.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
+        var myCol = possibleTargets.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
         {
             var dir = current.gameObject.transform.position - transform.position;
             var tuple = Tuple.Create(dir, dir.magnitude, current);
