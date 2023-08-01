@@ -1620,9 +1620,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _hp: 50
   _animator: {fileID: 1630438855357576974}
-  searchRange: 150
+  searchRange: 250
   currentPath: []
-  _speed: 10
+  _speed: 5
   _attackValue: 5
   _attackCooldown: 1.5
   _minAttackRange: 10

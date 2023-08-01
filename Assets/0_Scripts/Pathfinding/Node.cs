@@ -15,10 +15,10 @@ public class Node : MonoBehaviour
 
     private void Start()
     {
-        ResetNeighbours(null);
+        ResetNeighbours();
     }
 
-    public void ResetNeighbours(object[] parameters)
+    public void ResetNeighbours()
     {
         neighbors.Clear();
         

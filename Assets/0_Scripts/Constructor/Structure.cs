@@ -1,11 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class Structure : MonoBehaviour
+public class Structure : MonoBehaviour, IEntity
 {
     List<MeshRenderer> myMeshes;
+    [SerializeField] private float hp;
+    private float originalHP;
 
     private void Awake()
     {
@@ -20,6 +23,8 @@ public class Structure : MonoBehaviour
         {
             mesh.enabled = false;
         }
+
+        originalHP = hp;
     }
 
     public void OnBuild()
@@ -33,6 +38,8 @@ public class Structure : MonoBehaviour
         }
 
         GetComponent<BoxCollider>().enabled = true;
+        
+        NodeManager.instance.CalculateNodeNeighbours();
     }
 
     public void OnDestroyed()
@@ -46,5 +53,71 @@ public class Structure : MonoBehaviour
         }
 
         GetComponent<BoxCollider>().enabled = false;
+        
+        NodeManager.instance.CalculateNodeNeighbours();
     }
+
+    #region IENTITY
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+    }
+
+    public float Health
+    {
+        get
+        {
+            return hp;
+        }
+        set
+        {
+            hp = value;
+        }
+    }
+
+    public GameObject myGameObject
+    {
+        get
+        {
+            return gameObject;
+        }
+    }
+
+    public bool IsEnemy
+    {
+        get
+        {
+            return false;
+        }
+    }
+    public void TakeDamage(float damage)
+    {
+        Health -= damage;
+
+        if (hp <= 0)
+        {
+            OnDestroyed();
+            hp = originalHP;
+        }
+    }
+
+    private bool isInGrid = false;
+    public bool onGrid
+    {
+        get
+        {
+            return isInGrid;
+        }
+        set
+        {
+            isInGrid = value;
+        }
+    }
+    public event Action<IEntity> OnMove;
+
+    #endregion
 }

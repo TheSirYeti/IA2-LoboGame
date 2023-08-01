@@ -215,9 +215,6 @@ public class BombEnemy : BaseEnemy
         
         launch.OnUpdate += () =>
         {
-            _currentAttackCooldown -= Time.deltaTime;
-            transform.LookAt(new Vector3(_target.Position.x, transform.position.y, _target.Position.z));
-            
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);
@@ -226,13 +223,15 @@ public class BombEnemy : BaseEnemy
 
             if (_target == null)
             {
-                Debug.Log("NULLLLLL");
                 _fsm.SendInput(BombInputs.IDLE);
                 return;
             }
             
             if (_currentAttackCooldown >= 0) return;
             _fsm.SendInput(BombInputs.SHOOT);
+            
+            _currentAttackCooldown -= Time.deltaTime;
+            transform.LookAt(new Vector3(_target.Position.x, transform.position.y, _target.Position.z));
         };
 
         #endregion

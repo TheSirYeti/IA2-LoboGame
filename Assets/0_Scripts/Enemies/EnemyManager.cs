@@ -32,6 +32,11 @@ public class EnemyManager : MonoBehaviour
         _prefabCount = _enemyPrefabs.Count;
     }
 
+    private void Start()
+    {
+        StartCoroutine(DoEnemyWave());
+    }
+
     public void AddEnemy(BaseEnemy enemy)
     {
         spawnedEnemies.Add(enemy);
@@ -52,6 +57,8 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator DoEnemyWave()
     {
+        yield return new WaitForSeconds(20f);
+        
         for (int i = 0; i < _enemiesPerWave; i++)
         {
             var randEnemy = UnityEngine.Random.Range(0, _prefabCount);

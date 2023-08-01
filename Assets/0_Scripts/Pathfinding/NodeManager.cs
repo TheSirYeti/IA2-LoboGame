@@ -39,4 +39,12 @@ public class NodeManager : MonoBehaviour
 
         return index;
     }
+
+    public void CalculateNodeNeighbours()
+    {
+        foreach (var node in nodes)
+        {
+            node.ResetNeighbours();
+        }
+    }
 }

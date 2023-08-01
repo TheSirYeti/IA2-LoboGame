@@ -5,14 +5,15 @@ using IA2;
 using System.Linq;
 using System;
 
-public class Constructor : MonoBehaviour
+public class Constructor : MonoBehaviour, IEntity
 {
 
     public enum PlayerInputs { BUILD, IDLE, RUN_WITH_STONE, RUN_WITH_WOOD, GET_RESOURCE, DIE, REST }
     private EventFSM<PlayerInputs> _myFsm;
 
     [SerializeField] Animator _anim;
-    [SerializeField] int hp;
+    [SerializeField] float hp;
+    private float originalHP;
     [SerializeField] int buildStage;
 
     [Header("Physics")]
@@ -44,6 +45,7 @@ public class Constructor : MonoBehaviour
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         buildStage = 0;
+        originalHP = hp;
 
         startPos = transform.position;
 
@@ -153,7 +155,7 @@ public class Constructor : MonoBehaviour
         {
             transform.forward = dir;
 
-            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToGetResource) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToGetResource) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
                 _rb.velocity = dir * _speed;
             else
             {
@@ -188,7 +190,7 @@ public class Constructor : MonoBehaviour
         {
             transform.forward = dir;
 
-            if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
                 _rb.velocity = dir * _speedWithResource;
             else
             {
@@ -210,7 +212,7 @@ public class Constructor : MonoBehaviour
         {
             transform.forward = dir;
 
-            if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
                 _rb.velocity = dir * _speedWithResource;
             else
             {
@@ -299,6 +301,70 @@ public class Constructor : MonoBehaviour
     {
         _myFsm.FixedUpdate();
     }
+
+    #region IENTITY
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+    }
+
+    public float Health
+    {
+        get
+        {
+            return hp;
+        }
+        set
+        {
+            hp = value;
+        }
+    }
+
+    public GameObject myGameObject
+    {
+        get
+        {
+            return gameObject;
+        }
+    }
+
+    public bool IsEnemy
+    {
+        get
+        {
+            return false;
+        }
+    }
+    public void TakeDamage(float damage)
+    {
+        Health -= damage;
+
+        if (hp <= 0)
+        {
+            _myFsm.SendInput(PlayerInputs.DIE);
+            hp = originalHP;
+        }
+    }
+
+    private bool isInGrid = false;
+    public bool onGrid
+    {
+        get
+        {
+            return isInGrid;
+        }
+        set
+        {
+            isInGrid = value;
+        }
+    }
+    public event Action<IEntity> OnMove;
+
+    #endregion
 
 }
 

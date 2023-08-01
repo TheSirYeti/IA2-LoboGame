@@ -12,7 +12,8 @@ public class Collector : MonoBehaviour
     private EventFSM<PlayerInputs> _myFsm;
 
     [SerializeField] Animator _anim;
-    [SerializeField] int hp;
+    [SerializeField] float hp;
+    private float originalHP;
 
     [Header("Physics")]
     [SerializeField] private float _speed;
@@ -139,7 +140,7 @@ public class Collector : MonoBehaviour
         {
             transform.forward = dir;
 
-            if (Vector3.Distance(transform.position, _lootTarget.gameObject.transform.position) > _rangeToLoot) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _lootTarget.gameObject.transform.position) > _rangeToLoot) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
             {
                 _rb.velocity = dir * _speed;
             }
@@ -191,7 +192,7 @@ public class Collector : MonoBehaviour
             if (_containerTarget == null)
                 SendInputToFSM(PlayerInputs.IDLE);
 
-            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToDropLoot) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToDropLoot) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
                 _rb.velocity = dir * _speedWithLoot;
             else
             {
@@ -221,7 +222,7 @@ public class Collector : MonoBehaviour
 
 
 
-            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToDropLoot) //SI TODAVÍA NO ESTOY EN RANGO, SIGO CORRIENDO
+            if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToDropLoot) //SI TODAVï¿½A NO ESTOY EN RANGO, SIGO CORRIENDO
                 _rb.velocity = dir * _speedWithLoot;
             else
             {
@@ -279,4 +280,68 @@ public class Collector : MonoBehaviour
         _myFsm.FixedUpdate();
     }
 
+    
+    #region IENTITY
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+    }
+
+    public float Health
+    {
+        get
+        {
+            return hp;
+        }
+        set
+        {
+            hp = value;
+        }
+    }
+
+    public GameObject myGameObject
+    {
+        get
+        {
+            return gameObject;
+        }
+    }
+
+    public bool IsEnemy
+    {
+        get
+        {
+            return false;
+        }
+    }
+    public void TakeDamage(float damage)
+    {
+        Health -= damage;
+
+        if (hp <= 0)
+        {
+            _myFsm.SendInput(PlayerInputs.DIE);
+            hp = originalHP;
+        }
+    }
+
+    private bool isInGrid = false;
+    public bool onGrid
+    {
+        get
+        {
+            return isInGrid;
+        }
+        set
+        {
+            isInGrid = value;
+        }
+    }
+    public event Action<IEntity> OnMove;
+
+    #endregion
 }
