@@ -26,21 +26,14 @@ public class Bombarder : MonoBehaviour
     //Listas de flechas.
     public List<BombarderBbombs> _bombs = new List<BombarderBbombs>();//Lista de las bombas que va a tirar.
     [SerializeField] private int _bombsAmount;
+    [SerializeField] BombarderBbombs _bombPrefab;
 
-
-    public List<Arrows> _reloadingArrows = new List<Arrows>();//Lista de las flechas de recarga.
-    public List<Arrows> _auxArrowsList = new List<Arrows>();//Lista del refiller momentanea
-
-    //Posicion del spawner de flechas
+    //Posicion del spawner de bombas
     [SerializeField] GameObject _bombSpawner;
 
-    [SerializeField] private float _attackCd;//Cd after shooting
-    private float _attackCdCounter;
 
-
-
-    public bool isPanic;
-
+    [Header("DestructionState")]
+    [SerializeField] BaseEnemy _target;
 
     private void Awake()
     {
@@ -70,7 +63,7 @@ public class Bombarder : MonoBehaviour
 
         moving.OnEnter += x =>
         {
-            
+
         };
 
         moving.OnUpdate += () =>
@@ -78,7 +71,7 @@ public class Bombarder : MonoBehaviour
             //Esto es el comportamiento de waypoints
             Vector3 dir = safeWaypoints[_currentWaypoint].Item1.transform.position - transform.position;
             transform.forward = dir;
-            transform.position += transform.forward * _waypointSpeed * Time.deltaTime; 
+            transform.position += transform.forward * _waypointSpeed * Time.deltaTime;
 
             if (dir.magnitude < 0.15f)
             {
@@ -101,11 +94,7 @@ public class Bombarder : MonoBehaviour
         //Attacking
         attacking.OnEnter += x =>
         {
-
-            if (!_bombs.Any())
-                SendInputToFSM(PlayerInputs.DESTRUCTION);
-
-
+            Shoot();
         };
 
         attacking.OnUpdate += () =>
@@ -121,12 +110,17 @@ public class Bombarder : MonoBehaviour
 
         destruct.OnEnter += x =>
         {
-            Debug.Log("ME HICE CONCHA");
+            _target = TargetEnemy();
         };
 
         destruct.OnUpdate += () =>
         {
-    
+            Vector3 dir = _target.transform.position - transform.position;
+            transform.forward = dir;
+            transform.position += transform.forward * _waypointSpeed * Time.deltaTime;
+
+            if (dir.magnitude < 0.15f)
+                Destroy(gameObject);
         };
 
         destruct.OnExit += x =>
@@ -150,6 +144,8 @@ public class Bombarder : MonoBehaviour
         //Creo la lista de safe waypoints
         safeWaypoints = SafeWaypoint(wpSafety).ToList();
 
+        _bombs = BombLoading(_bombPrefab, _bombsAmount).ToList();
+
         //Way
         allWaypoints = WpCreator(safeWaypoints).ToList();
 
@@ -166,9 +162,10 @@ public class Bombarder : MonoBehaviour
     }
 
 
-    IEnumerable <Transform> WpCreator(List<Tuple<Waypoint, bool>> tuple)
+    //Crea la lista de waypoints de los safe waypoints
+    IEnumerable<Transform> WpCreator(List<Tuple<Waypoint, bool>> tuple)
     {
-        var myCol =  tuple.Select(x => x.Item1.transform);
+        var myCol = tuple.Select(x => x.Item1.transform);
         return myCol;
     }
 
@@ -195,6 +192,16 @@ public class Bombarder : MonoBehaviour
         {
             var instantiateBullet = Instantiate(_bombs.FirstOrDefault(), _bombSpawner.transform.position, transform.rotation);
             _bombs = DecreasingAmmo(_bombs, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
+            SendInputToFSM(PlayerInputs.MOVE);
+        }
+    }
+
+    //Generator//
+    public IEnumerable<BombarderBbombs> BombLoading(BombarderBbombs bombs, int ammount)
+    {
+        for (int i = 0; i < ammount; i++)
+        {
+                yield return bombs;
         }
     }
 
@@ -207,6 +214,27 @@ public class Bombarder : MonoBehaviour
               .Where(x => x.Item2);
 
         return myCol;
+    }
+
+
+
+    BaseEnemy TargetEnemy()
+    {
+        var sphere = Physics.OverlapSphere(transform.position, 30, 11); //Una esfera de colisiones
+
+        var colTest = sphere.Select(x => x.GetComponent<BaseEnemy>());
+
+        var myCol = colTest.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
+        {
+            var dir = current.gameObject.transform.position - transform.position;
+            var tuple = Tuple.Create(dir, dir.magnitude, current);
+            acum.Add(tuple);
+
+            return acum;
+
+        }).OrderBy(x => x.Item2);
+
+        return  myCol.FirstOrDefault().Item3;
     }
 
 }
