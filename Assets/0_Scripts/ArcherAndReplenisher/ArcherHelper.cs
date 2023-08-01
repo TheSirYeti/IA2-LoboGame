@@ -24,9 +24,13 @@ public class ArcherHelper : MonoBehaviour
     [SerializeField] float _moveSpeed;
 
     [Header("CraftingState")]
-    [SerializeField] List<Arrows> _auxArrowsList = new List<Arrows>();//AuxList siempre filleada es para craftear
-    [SerializeField] List<Arrows> _craftedArrows = new List<Arrows>();//AuxList siempre filleada es para craftear
+    //[SerializeField] List<Arrows> _auxArrowsList = new List<Arrows>();//AuxList siempre filleada es para craftear
+    [SerializeField] List<Arrows> _craftedArrows = new List<Arrows>();//Lista de flechas creadas
     [SerializeField] float _craftTime;
+
+    [SerializeField] Arrows _arrow;
+    [SerializeField] int _failChance;
+    [SerializeField] int _craftAttempts;
     private float _craftCounter;
 
     [Header("RefllingState")]
@@ -182,7 +186,11 @@ public class ArcherHelper : MonoBehaviour
         crafting.OnEnter += x =>
         {
             Debug.Log("enter ctafting");
-            _craftedArrows = ArrowCrafter(_auxArrowsList).ToList();
+            //Esto es si se quiere usar con aggregate y una lista auxiliar
+            //_craftedArrows = ArrowCrafter(_auxArrowsList).ToList();
+
+            //Este es con el generator
+            _craftedArrows = CraftingTime(_arrow, _failChance, _craftAttempts).ToList();
 
             //Crafting Time
             _craftCounter = _craftTime;
@@ -237,6 +245,8 @@ public class ArcherHelper : MonoBehaviour
 
     //Refill flechas esta funcion la tengo que pasar al que refillea las flechas justamente
 
+
+    //Este es para recargar con aggregate y una lista auxiliar.
     public IEnumerable<Arrows> ArrowCrafter(List<Arrows> arrows)
     {
         var myCol = arrows.Aggregate(new List<Arrows>(), (acum, current) =>
@@ -251,6 +261,17 @@ public class ArcherHelper : MonoBehaviour
     {
         var myCol = arrows.Skip(arrows.Count());
         return myCol;
+    }
+
+    //Generator//
+    public IEnumerable<Arrows> CraftingTime(Arrows arrows, float failChance, int attempts)
+    {
+        for (int i = 0; i < attempts; i++)
+        {
+            var randomSuccessChance = UnityEngine.Random.Range(0, 101);
+            if (randomSuccessChance > failChance)
+                yield return arrows;
+        }
     }
 
 }

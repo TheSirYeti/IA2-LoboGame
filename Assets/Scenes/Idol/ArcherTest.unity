@@ -4120,19 +4120,11 @@ MonoBehaviour:
   _deliverPos: {fileID: 2085271560}
   _isDelivering: 0
   _moveSpeed: 5
-  _auxArrowsList:
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
-  - {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
   _craftedArrows: []
   _craftTime: 10
+  _arrow: {fileID: 8309954714043708686, guid: 83d1dc014f9d9bb499c892fd1a2513d9, type: 3}
+  _failChance: 30
+  _craftAttempts: 20
   _refillTime: 3
 --- !u!95 &1975864279
 Animator:
