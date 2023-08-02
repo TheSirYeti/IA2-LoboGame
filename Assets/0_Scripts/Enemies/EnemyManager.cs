@@ -16,6 +16,7 @@ public class EnemyManager : MonoBehaviour
     private float _waveMultiplier = 1.5f;
     [Space(15)] 
     [SerializeField] private float _enemySpawnCooldown;
+    [SerializeField] private float _enemySpawnReducer;
     [SerializeField] private List<GameObject> _enemyPrefabs;
     private int _prefabCount;
     [SerializeField] private List<Transform> _spawnpoints;
@@ -69,8 +70,15 @@ public class EnemyManager : MonoBehaviour
             enemy.transform.position = _spawnpoints[randPos].position;
             
             yield return new WaitForSeconds(_enemySpawnCooldown);
+
+            _enemySpawnCooldown -= _enemySpawnReducer;
+            if (_enemySpawnCooldown <= 1.5f)
+                _enemySpawnCooldown = 1.5f;
+            
+            yield return null;
         }
 
+        Village.instance.Win();
         _enemiesPerWave *= _waveMultiplier;
         yield return null;
     }

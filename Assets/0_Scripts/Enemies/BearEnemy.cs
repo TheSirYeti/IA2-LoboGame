@@ -287,15 +287,18 @@ public class BearEnemy : BaseEnemy
 
         yield return new WaitForSeconds(1f);
 
-        var villagers = _query.Query().Where(x => !x.IsEnemy);
+        var villagers = _query.Query().Where(x => !x.IsEnemy).ToList();
         
-        if (villagers.Any())
+        Debug.Log("MELEE ATACO A " + villagers.Count);
+        
+        if (villagers.Count() != 0)
         {
             foreach (var villager in villagers)
             {
                 villager.TakeDamage(_attackValue);
             }
         }
+        
         
         _fsm.SendInput(BearInputs.IDLE);
         yield return null;

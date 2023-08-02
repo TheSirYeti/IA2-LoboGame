@@ -153,7 +153,12 @@ public class Archer : MonoBehaviour
         //Attacking
         attacking.OnEnter += x =>
         {
-            //Debug.Log("entre a attack");
+            if (_target == null || _target.gameObject == null)
+            {
+                SendInputToFSM(PlayerInputs.IDLE);
+                return;
+            }
+                //Debug.Log("entre a attack");
             Vector3 arrowDir = _target.transform.position - _arrowsSpawner.transform.position;
             _arrowsSpawner.transform.forward = arrowDir;
             transform.forward = arrowDir +  new Vector3(0, 3, 0);

@@ -102,7 +102,6 @@ public class BombEnemy : BaseEnemy
         
         move.OnUpdate += () =>
         {
-            Debug.Log("MOVE?");
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);
@@ -144,6 +143,8 @@ public class BombEnemy : BaseEnemy
 
         pathfind.OnEnter += x =>
         {
+            _animator.SetFloat("movementSpeed", _speed);
+            
             int startNodeID = NodeManager.instance.GetClosestNode(transform);
             int endNodeID = NodeManager.instance.GetClosestNode(_target.myGameObject.transform);
             
@@ -156,8 +157,6 @@ public class BombEnemy : BaseEnemy
 
         pathfind.OnUpdate += () =>
         {
-            Debug.Log("PF");
-            
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);
@@ -215,7 +214,6 @@ public class BombEnemy : BaseEnemy
         
         launch.OnUpdate += () =>
         {
-            Debug.Log("SHOOT?");
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);

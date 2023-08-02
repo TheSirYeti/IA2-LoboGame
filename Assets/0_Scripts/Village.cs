@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class Village : MonoBehaviour
 {
     public static Village instance;
-    [SerializeField] private GameObject gameOverSign;
+    [SerializeField] private GameObject gameOverSign, winSign;
     [SerializeField] private GameObject bomberPrefab;
     [SerializeField] private Transform bomberSpawnpoint;
     
@@ -46,5 +46,10 @@ public class Village : MonoBehaviour
     {
         var bomber = Instantiate(bomberPrefab);
         bomber.transform.position = bomberSpawnpoint.position;
+    }
+
+    public void Win()
+    {
+        winSign.SetActive(true);
     }
 }
