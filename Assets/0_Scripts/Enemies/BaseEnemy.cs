@@ -84,7 +84,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
         }
     }
 
-    public event Action<IEntity> OnMove = delegate {};
+    public event Action<IEntity> OnMove = delegate { };
 
     public void CalculatePathfinding(Node startingNode, Node goalNode)
     {

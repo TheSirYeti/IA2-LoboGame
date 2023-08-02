@@ -87,7 +87,6 @@ public class Archer : MonoBehaviour
         {
             _anim.Play("Idle");
             _restingTimeCounter = _restingTime;
-            Debug.Log("entre a idle");
         };
 
         idle.OnUpdate += () =>

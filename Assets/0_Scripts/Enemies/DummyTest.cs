@@ -7,6 +7,11 @@ public class DummyTest : MonoBehaviour, IEntity
 {
     [SerializeField] private float _hp = 15f;
 
+    private void Start()
+    {
+        Village.instance.AddVillager(this);
+    }
+
     public Vector3 Position
     {
         get
@@ -46,6 +51,7 @@ public class DummyTest : MonoBehaviour, IEntity
 
         if (_hp <= 0)
         {
+            Village.instance.RemoveVillager(this);
             gameObject.SetActive(false);
         }
     }
@@ -63,5 +69,5 @@ public class DummyTest : MonoBehaviour, IEntity
         }
     }
 
-    public event Action<IEntity> OnMove = delegate {};
+    public event Action<IEntity> OnMove = delegate { };
 }

@@ -287,6 +287,10 @@ public class Constructor : MonoBehaviour, IEntity
         _myFsm = new EventFSM<PlayerInputs>(idle);
     }
 
+    private void Start()
+    {
+        Village.instance.AddVillager(this);
+    }
 
     private void SendInputToFSM(PlayerInputs inp)
     {
@@ -346,6 +350,7 @@ public class Constructor : MonoBehaviour, IEntity
 
         if (hp <= 0)
         {
+            Village.instance.RemoveVillager(this);
             _myFsm.SendInput(PlayerInputs.DIE);
             hp = originalHP;
         }

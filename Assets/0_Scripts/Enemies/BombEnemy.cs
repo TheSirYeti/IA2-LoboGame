@@ -110,7 +110,6 @@ public class BombEnemy : BaseEnemy
 
             if (_target == null)
             {
-                Debug.Log("NULLLLLL");
                 _fsm.SendInput(BombInputs.IDLE);
                 return;
             }
@@ -255,7 +254,11 @@ public class BombEnemy : BaseEnemy
 
         die.OnEnter += x =>
         {
+            Debug.Log("DIE");
             _animator.Play("Bear_Death");
+            
+            EnemyManager.instance.RemoveEnemy(this);
+            Destroy(gameObject, 5f);
         };
 
         #endregion
@@ -268,11 +271,6 @@ public class BombEnemy : BaseEnemy
     private void Update()
     {
         _fsm.Update();
-
-        if (_target != null)
-        {
-            Debug.Log(_target.myGameObject.name + " + " + gameObject.name);
-        }
     }
 
     public override void Attack()

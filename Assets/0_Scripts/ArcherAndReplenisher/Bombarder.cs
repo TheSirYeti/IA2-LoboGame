@@ -33,6 +33,7 @@ public class Bombarder : MonoBehaviour
 
 
     [Header("DestructionState")]
+    [SerializeField] float _damage;
     [SerializeField] BaseEnemy _target;
     [SerializeField] float _destructionSpeed;
     [SerializeField] ParticleSystem _explosionParticles;
@@ -43,6 +44,9 @@ public class Bombarder : MonoBehaviour
 
     private void Awake()
     {
+        wpSafety = FindObjectOfType<WaypointSafety>();
+        if(wpSafety == null) Destroy(gameObject);
+
         //_myRb = gameObject.GetComponent<Rigidbody>();
         //PARTE 1: SETEO INICIAL
 
@@ -117,18 +121,40 @@ public class Bombarder : MonoBehaviour
         destruct.OnEnter += x =>
         {
             _target = TargetEnemy(PossibleTargets().ToList());
+
+            if(_target == null || _target.gameObject == null)
+                Destroy(gameObject);
+            
             //test = PossibleTargets().ToList();
             _destroyCounter = 3;
         };
 
         destruct.OnUpdate += () =>
         {
+            if(_target == null || _target.gameObject == null)
+                Destroy(gameObject);
+            
             Vector3 dir = _target.transform.position - transform.position;
             transform.forward = dir;
             transform.position += transform.forward * _destructionSpeed * Time.deltaTime;
 
             if (dir.magnitude < 0.15f)
             {
+                var enemies = Physics.OverlapSphere(transform.position, 10f)
+                    .Select(x => x.gameObject.GetComponent<IEntity>())
+                    .Where(x => x != null && x.IsEnemy)
+                    .ToList();
+
+                if (enemies.Count() >= 5)
+                {
+                    enemies = enemies.OrderBy(x => Vector3.Distance(x.Position, transform.position)).Take(5).ToList();
+                }
+                
+                foreach (var enemy in enemies)
+                {
+                    enemy.TakeDamage(_damage);
+                }
+
                 _destructionSpeed = 0;
                 _mesh.SetActive(false);
                 _explosionParticles.Play();

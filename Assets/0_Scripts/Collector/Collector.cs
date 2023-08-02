@@ -5,7 +5,7 @@ using IA2;
 using System.Linq;
 using System;
 
-public class Collector : MonoBehaviour
+public class Collector : MonoBehaviour, IEntity
 {
 
     public enum PlayerInputs { LOOT, IDLE, RUN_WITH_STONE, RUN_WITH_WOOD, PUT_DOWN_RESOURCE, DIE }
@@ -140,6 +140,9 @@ public class Collector : MonoBehaviour
         {
             transform.forward = dir;
 
+            if (_lootTarget == null || _lootTarget.gameObject == null) 
+                SendInputToFSM(PlayerInputs.IDLE);
+
             if (Vector3.Distance(transform.position, _lootTarget.gameObject.transform.position) > _rangeToLoot) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
             {
                 _rb.velocity = dir * _speed;
@@ -257,14 +260,19 @@ public class Collector : MonoBehaviour
 
         dying.OnEnter += x =>
         {
-            Destroy(gameObject);
+            Village.instance.RemoveVillager(this);
+            gameObject.SetActive(false);
         };
 
         //Choose first state.
         _myFsm = new EventFSM<PlayerInputs>(idle);
     }
 
-
+    private void Start()
+    {
+        Village.instance.AddVillager(this);
+    }
+    
     private void SendInputToFSM(PlayerInputs inp)
     {
         _myFsm.SendInput(inp);

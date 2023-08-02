@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BombarderBbombs : MonoBehaviour
@@ -7,7 +9,8 @@ public class BombarderBbombs : MonoBehaviour
     [SerializeField] ParticleSystem _ps;
     [SerializeField] float _lifetime;
     [SerializeField] bool _collided;
-
+    [SerializeField] float _damage;
+    
 
     private void Update()
     {
@@ -25,6 +28,7 @@ public class BombarderBbombs : MonoBehaviour
         var enemy = other.GetComponent<BaseEnemy>();
         if (enemy)
         {
+            enemy.TakeDamage(_damage);
             _ps.Play();
             _collided = true;
         }
@@ -42,6 +46,20 @@ public class BombarderBbombs : MonoBehaviour
         if (collision.gameObject.layer == 9)
         {
             _ps.Play();
+            var enemies = Physics.OverlapSphere(transform.position, 10f)
+                .Select(x => x.gameObject.GetComponent<IEntity>())
+                .Where(x => x != null && x.IsEnemy)
+                .ToList();
+
+            if (enemies.Count() >= 5)
+            {
+                enemies = enemies.OrderBy(x => Vector3.Distance(x.Position, transform.position)).Take(5).ToList();
+            }
+                
+            foreach (var enemy in enemies)
+            {
+                enemy.TakeDamage(_damage);
+            }
             
             _collided = true;
         }

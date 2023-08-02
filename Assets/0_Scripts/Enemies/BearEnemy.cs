@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using IA2;
+using UnityEditorInternal;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -14,8 +15,9 @@ public class BearEnemy : BaseEnemy
 
     [Header("Move Properties")] 
     [SerializeField] private float _speed;
-    
+
     [Header("Attack Properties")] 
+    [SerializeField] private Queries _query;
     [SerializeField] private float _attackValue;
     [SerializeField] private float _attackCooldown = 1.5f;
     private float _currentAttackCooldown = 0f;
@@ -27,6 +29,8 @@ public class BearEnemy : BaseEnemy
     private void Start()
     {
         SetupFSMStates();
+        
+        _query.targetGrid = SpatialGrid.instance;
     }
 
     void SetupFSMStates()
@@ -249,7 +253,11 @@ public class BearEnemy : BaseEnemy
 
         die.OnEnter += x =>
         {
+            Debug.Log("DIE");
             _animator.Play("Bear_Death");
+            
+            EnemyManager.instance.RemoveEnemy(this);
+            Destroy(gameObject, 5f);
         };
 
         #endregion
@@ -262,11 +270,6 @@ public class BearEnemy : BaseEnemy
     private void Update()
     {
         _fsm.Update();
-        
-        if (_target != null)
-        {
-            Debug.Log(_target.myGameObject.name + " + " + gameObject.name);
-        }
     }
 
     public override void Attack()
@@ -281,10 +284,18 @@ public class BearEnemy : BaseEnemy
         _animator.Play("Bear_Attack" + rand);
 
         yield return new WaitForSeconds(1f);
+
+        var villagers = _query.Query().Where(x => !x.IsEnemy);
         
-        _target.TakeDamage(_attackValue);
-        _target = null;
+        if (villagers.Any())
+        {
+            foreach (var villager in villagers)
+            {
+                villager.TakeDamage(_attackValue);
+            }
+        }
         
+        _fsm.SendInput(BearInputs.IDLE);
         yield return null;
     }
 }

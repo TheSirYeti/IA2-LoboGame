@@ -29,13 +29,14 @@ Transform:
   m_GameObject: {fileID: 3351010963488045825}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.92, y: 13.07, z: 20.22}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2957624477724578234}
   - {fileID: 3351010965482836798}
   - {fileID: 3351010963608944090}
   - {fileID: 3351010965183266554}
+  - {fileID: 5542572360575419206}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -122,6 +123,8 @@ MonoBehaviour:
   _bombsAmount: 8
   _bombPrefab: {fileID: -3578789258300059417, guid: d767026d653a6594e8cb887a4e2d9600, type: 3}
   _bombSpawner: {fileID: 3351010965482836799}
+  _query: {fileID: 6245534538361493228}
+  _damage: 10
   _target: {fileID: 0}
   _destructionSpeed: 20
   _explosionParticles: {fileID: 3351010965183266532}
@@ -5067,6 +5070,55 @@ Transform:
   m_Father: {fileID: 3351010963488045836}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8212275127778108681
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5542572360575419206}
+  - component: {fileID: 6245534538361493228}
+  m_Layer: 0
+  m_Name: CircleQuery
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5542572360575419206
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8212275127778108681}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3351010963488045836}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6245534538361493228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8212275127778108681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13e56912cd12994d84bf893fd779f87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isBox: 0
+  radius: 10
+  targetGrid: {fileID: 0}
+  width: 15
+  height: 30
 --- !u!1001 &3351010964131247697
 PrefabInstance:
   m_ObjectHideFlags: 0
