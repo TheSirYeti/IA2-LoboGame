@@ -68,6 +68,7 @@ public class Constructor : MonoBehaviour, IEntity
         StateConfigurer.Create(getResource)
             .SetTransition(PlayerInputs.RUN_WITH_STONE, runWithStone)
             .SetTransition(PlayerInputs.RUN_WITH_WOOD, runWithWood)
+            .SetTransition(PlayerInputs.REST, rest)
             .SetTransition(PlayerInputs.DIE, dying)
             .Done();
 
@@ -112,7 +113,7 @@ public class Constructor : MonoBehaviour, IEntity
 
             if (buildStage == 0)
             {
-                if (_restTimer >= _restTime )
+                if (_restTimer >= _restTime)
                 {
                     if (ContainerManager.instance.takenWoodContainers.Any() && StructureManager.instance.availablesStructures.Any()) //SI NO HAY ARBOLES O PIEDRAS PARA LOOTEAR RESETEO EL IDLE, TAMBIEN CHEQUEO QUE HAYA LUGAR PARA CONSTRUIR
                         SendInputToFSM(PlayerInputs.GET_RESOURCE);
@@ -149,12 +150,10 @@ public class Constructor : MonoBehaviour, IEntity
                 _containerTarget = ContainerManager.instance.takenStoneContainers.OrderBy(x => Vector3.Distance(gameObject.transform.position, x.gameObject.transform.position)).FirstOrDefault();
 
             if (_containerTarget == null)
-            {
-                SendInputToFSM(PlayerInputs.IDLE);
-                return;
-            }
-                
-            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
+                SendInputToFSM(PlayerInputs.REST);
+            
+            if (_containerTarget != null)
+                dir = (transform.position - _containerTarget.transform.position).normalized * -1;
         };
 
         getResource.OnUpdate += () =>

@@ -43,7 +43,7 @@ public class Collector : MonoBehaviour, IEntity
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         //PARTE 1: SETEO INICIAL
-        //Time.timeScale *= 5;
+        //Time.timeScale *= 3;
         //Creo los estados
         var idle = new State<PlayerInputs>("Idle");
         var dying = new State<PlayerInputs>("Die");
@@ -99,7 +99,7 @@ public class Collector : MonoBehaviour, IEntity
         idle.OnUpdate += () =>
         {
             _restTimer += Time.deltaTime;
-           
+
             if (_restTimer >= _restTime)
             {
                 if ((CollectableManager.instance.availablesTrees.Any() || CollectableManager.instance.availablesStones.Any()) &&
@@ -136,10 +136,10 @@ public class Collector : MonoBehaviour, IEntity
             if (_lootTarget == null || _lootTarget.gameObject == null)
             {
                 SendInputToFSM(PlayerInputs.IDLE);
-                return;
             }
-            
-            dir = (transform.position - _lootTarget.transform.position).normalized * -1;
+
+            if (_lootTarget != null)
+                dir = (transform.position - _lootTarget.transform.position).normalized * -1;
         };
 
         looting.OnUpdate += () =>
@@ -281,7 +281,7 @@ public class Collector : MonoBehaviour, IEntity
     {
         Village.instance.AddVillager(this);
     }
-    
+
     private void SendInputToFSM(PlayerInputs inp)
     {
         _myFsm.SendInput(inp);
@@ -297,7 +297,7 @@ public class Collector : MonoBehaviour, IEntity
         _myFsm.FixedUpdate();
     }
 
-    
+
     #region IENTITY
 
     public Vector3 Position
