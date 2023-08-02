@@ -152,8 +152,6 @@ public class BearEnemy : BaseEnemy
 
         pathfind.OnUpdate += () =>
         {
-            Debug.Log("PF");
-            
             if (_hp <= 0)
             {
                 _fsm.SendInput(BearInputs.DIE);
@@ -254,7 +252,6 @@ public class BearEnemy : BaseEnemy
 
         die.OnEnter += x =>
         {
-            Debug.Log("DIE");
             _animator.Play("Bear_Death");
             
             EnemyManager.instance.RemoveEnemy(this);

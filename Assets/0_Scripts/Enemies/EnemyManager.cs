@@ -82,4 +82,13 @@ public class EnemyManager : MonoBehaviour
         _enemiesPerWave *= _waveMultiplier;
         yield return null;
     }
+
+    public BaseEnemy GetClosestEnemy(Vector3 position)
+    {
+        if (!spawnedEnemies.Any()) return null;
+
+        return spawnedEnemies.Select(x => x)
+            .OrderBy(x => Vector3.Distance(x.Position, position))
+            .FirstOrDefault();
+    }
 }

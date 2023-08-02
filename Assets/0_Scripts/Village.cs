@@ -50,7 +50,8 @@ public class Village : MonoBehaviour
 
     public void Win()
     {
-        winSign.SetActive(true);
+        if(!gameOverSign.activeSelf)
+            winSign.SetActive(true);
     }
 
     private bool isFastForwarding = false;

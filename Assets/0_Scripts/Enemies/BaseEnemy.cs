@@ -87,6 +87,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
 
     public event Action<IEntity> OnMove = delegate { };
 
+    //IA2-PATHFINDING
     public void CalculatePathfinding(Node startingNode, Node goalNode)
     {
         currentPath = new List<Node>();
@@ -111,6 +112,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
                 if (InSight(currentPath[index].transform.position, currentPath[indexNextNext].transform.position))
                     currentPath.Remove(currentPath[index + 1]);
                 else index++;
+                
                 if (stopwatch.ElapsedMilliseconds >= timeSlice)
                 {
                     stopwatch.Restart();
@@ -192,8 +194,9 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
             if (stopwatch.ElapsedMilliseconds >= timeSlice)
             {
                 Debug.Log("SLICE");
-                yield return null;
+                yield return new WaitForEndOfFrame();
                 stopwatch.Restart();
+                yield return null;
             }
         }
     }

@@ -291,7 +291,10 @@ public class Bombarder : MonoBehaviour
 
         }).OrderBy(x => x.Item2);
 
-        return  myCol.FirstOrDefault().Item3;
+        if (myCol.Any())
+            return myCol.FirstOrDefault().Item3;
+        
+        return null;
     }
 
 }

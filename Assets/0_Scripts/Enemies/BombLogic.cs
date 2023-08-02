@@ -38,6 +38,7 @@ public class BombLogic : MonoBehaviour
         transform.LookAt(nextPos, transform.forward);
         transform.position = nextPos;
         
+        //IA2-LINQ-GRID
         if (_progress >= 1.0f)
         {
             var entities = query.Query().Where(x => !x.IsEnemy);

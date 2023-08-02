@@ -81,7 +81,6 @@ public class ArcherHelper : MonoBehaviour
 
         idle.OnEnter += x =>
         {
-            Debug.Log("enter idle");
             Debug.Log(_myArcher.isPanic);
         };
 
@@ -117,7 +116,6 @@ public class ArcherHelper : MonoBehaviour
         delivering.OnFixedUpdate += () =>
         {
             _anim.Play("Run");
-            Debug.Log("enter delivery");
             if (_isDelivering) //Si hace deliver entonces esta yendo
             {
                 
@@ -155,7 +153,6 @@ public class ArcherHelper : MonoBehaviour
         refilling.OnEnter += x =>
         {
             _anim.Play("Throw");
-            Debug.Log("enter refill");
             _isDelivering = false;
             //Hago un concat entre las flechas que tenga en el reloading en este momento y las flechas que craftie
             _myArcher._reloadingArrows = _myArcher._reloadingArrows.Concat(ArrowCrafter(_craftedArrows)).ToList();
@@ -185,7 +182,6 @@ public class ArcherHelper : MonoBehaviour
 
         crafting.OnEnter += x =>
         {
-            Debug.Log("enter ctafting");
             //Esto es si se quiere usar con aggregate y una lista auxiliar
             //_craftedArrows = ArrowCrafter(_auxArrowsList).ToList();
 
