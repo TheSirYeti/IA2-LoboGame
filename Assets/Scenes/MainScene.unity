@@ -19596,7 +19596,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnedEnemies: []
   _enemiesPerWave: 100
-  _enemySpawnCooldown: 10
+  _enemySpawnCooldown: 20
   _enemyPrefabs:
   - {fileID: 3361808950954998307, guid: c57b2b0a2b769fb42b3a25fa69b24943, type: 3}
   - {fileID: 5407565277856053198, guid: 215e1f0bc2bc5fc4c9b2147f25ce2b48, type: 3}
