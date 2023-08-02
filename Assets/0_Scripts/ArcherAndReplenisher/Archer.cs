@@ -260,6 +260,7 @@ public class Archer : MonoBehaviour
     // Final IA-2 - Aggregate - First Or Default - Order By - //
     BaseEnemy TargetEnemy(List<BaseEnemy> possibleTargets)
     {
+        //IA2-LINQ
         var myCol = possibleTargets.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
         {
             var dir = current.gameObject.transform.position - transform.position;

@@ -143,6 +143,7 @@ public class Bombarder : MonoBehaviour
 
             if (dir.magnitude < 0.15f)
             {
+                //IA2-LINQ
                 var enemies = Physics.OverlapSphere(transform.position, 5f)
                     .Select(x => x.gameObject.GetComponent<IEntity>())
                     .Where(x => x != null && x.IsEnemy)
@@ -218,6 +219,7 @@ public class Bombarder : MonoBehaviour
     //Crea la lista de waypoints de los safe waypoints
     IEnumerable<Transform> WpCreator(List<Tuple<Waypoint, bool>> tuple)
     {
+        //IA2-LINQ
         var myCol = tuple.Select(x => x.Item1.transform);
         return myCol;
     }
@@ -226,6 +228,7 @@ public class Bombarder : MonoBehaviour
     //Saca bombas
     IEnumerable<BombarderBbombs> DecreasingAmmo(List<BombarderBbombs> arrows, int ammo)
     {
+        //IA2-LINQ
         var myCol = arrows.Skip(ammo);
         return myCol;
     }
@@ -271,6 +274,8 @@ public class Bombarder : MonoBehaviour
     {
         //Obtengo una lista de waypoints y ahi es donde creo la tupla booleanos / waypoints, de aca saco los waypoints safe
         //osea por los que me quiero mover (los que tienen is safe)
+        
+        //IA2-LINQ
         var myCol = wpList.waypoints.Zip(wpList.canEnter, (booleans, waypoints) => Tuple.Create(booleans, waypoints))
               .Where(x => x.Item2);
 
@@ -281,6 +286,7 @@ public class Bombarder : MonoBehaviour
     // Final IA-2 - Aggregate - First Or Default - Order By - //
     BaseEnemy TargetEnemy(List<BaseEnemy> possibleTargets)
     {
+        //IA2-LINQ
         var myCol = possibleTargets.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
         {
             var dir = current.gameObject.transform.position - transform.position;

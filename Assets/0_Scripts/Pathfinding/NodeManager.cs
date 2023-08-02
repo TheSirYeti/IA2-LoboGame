@@ -26,6 +26,7 @@ public class NodeManager : MonoBehaviour
     {
         int index = -1;
         float minDistance = Mathf.Infinity;
+        
         for (int i = 0; i < nodes.Count; i++)
         {
             float distance = Vector3.Distance(t.position, nodes[i].transform.position);

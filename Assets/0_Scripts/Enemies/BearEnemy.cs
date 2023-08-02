@@ -284,10 +284,9 @@ public class BearEnemy : BaseEnemy
 
         yield return new WaitForSeconds(1f);
 
+        //IA2-GRID
         var villagers = _query.Query().Where(x => !x.IsEnemy).ToList();
-        
-        Debug.Log("MELEE ATACO A " + villagers.Count);
-        
+
         if (villagers.Count() != 0)
         {
             foreach (var villager in villagers)
@@ -295,8 +294,7 @@ public class BearEnemy : BaseEnemy
                 villager.TakeDamage(_attackValue);
             }
         }
-        
-        
+
         _fsm.SendInput(BearInputs.IDLE);
         yield return null;
     }

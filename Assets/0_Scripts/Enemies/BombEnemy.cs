@@ -291,8 +291,6 @@ public class BombEnemy : BaseEnemy
         yield return new WaitForSeconds(2f);
         
         _fsm.SendInput(BombInputs.IDLE);
-        Debug.Log("BOMBAAA");
-        
         yield return null;
     }
 }

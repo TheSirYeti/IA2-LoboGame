@@ -131,6 +131,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
         return !Physics.Raycast(start, dir, dir.magnitude, NodeManager.instance.wallMask);
     }
 
+    //IA2-PATHFINDING
     IEnumerator ConstructPathAStar(Node startingNode, Node goalNode)
     {
         Stopwatch stopwatch = new Stopwatch();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,7 +21,7 @@ public class Village : MonoBehaviour
 
     private void Update()
     {
-        if (allVillagers.Count <= 0)
+        if (allVillagers.Count <= 0 && !winSign.activeSelf)
         {
             gameOverSign.SetActive(true);
         }
@@ -50,8 +51,11 @@ public class Village : MonoBehaviour
 
     public void Win()
     {
-        if(!gameOverSign.activeSelf)
+        //IA2-LINQ
+        if (allVillagers.All(x => x.Health > 0) && !gameOverSign.activeSelf)
+        {
             winSign.SetActive(true);
+        }
     }
 
     private bool isFastForwarding = false;

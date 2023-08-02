@@ -51,6 +51,7 @@ public class EnemyManager : MonoBehaviour
 
     public bool ContainsEnemy(BaseEnemy enemy)
     {
+        //IA2-LINQ
         var myEnemy = spawnedEnemies.Select(x => x).Where(x => x == enemy).Take(1);
 
         if (myEnemy == null) return false;
@@ -85,6 +86,7 @@ public class EnemyManager : MonoBehaviour
 
     public BaseEnemy GetClosestEnemy(Vector3 position)
     {
+        //IA2-LINQ
         if (!spawnedEnemies.Any()) return null;
 
         return spawnedEnemies.Select(x => x)

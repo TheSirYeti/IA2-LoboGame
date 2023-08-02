@@ -150,6 +150,7 @@ public class ArcherHelper : MonoBehaviour
         };
 
         //Le hace refill a las flechas del arquero que tiene guardadas
+        //IA2-LINQ
         refilling.OnEnter += x =>
         {
             _anim.Play("Throw");
@@ -243,6 +244,7 @@ public class ArcherHelper : MonoBehaviour
 
 
     //Este es para recargar con aggregate y una lista auxiliar.
+    //IA2-LINQ
     public IEnumerable<Arrows> ArrowCrafter(List<Arrows> arrows)
     {
         var myCol = arrows.Aggregate(new List<Arrows>(), (acum, current) =>
@@ -253,6 +255,7 @@ public class ArcherHelper : MonoBehaviour
         return myCol;
     }
 
+    //IA2-LINQ
     public IEnumerable<Arrows> ArrowTaker(List<Arrows> arrows)
     {
         var myCol = arrows.Skip(arrows.Count());
