@@ -25,6 +25,7 @@ public class BombEnemy : BaseEnemy
 
     private void Start()
     {
+        EnemyManager.instance.spawnedEnemies.Add(this);
         SetupFSMStates();
     }
 
@@ -258,6 +259,7 @@ public class BombEnemy : BaseEnemy
             _animator.Play("Bear_Death");
             
             EnemyManager.instance.RemoveEnemy(this);
+            EnemyManager.instance.spawnedEnemies.Remove(this);
             Destroy(gameObject, 5f);
         };
 

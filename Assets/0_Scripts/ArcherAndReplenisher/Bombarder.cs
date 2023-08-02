@@ -265,6 +265,8 @@ public class Bombarder : MonoBehaviour
     }
 
 
+
+    // Final IA2- Zip - Where //
     IEnumerable<Tuple<Waypoint, bool>> SafeWaypoint(WaypointSafety wpList)
     {
         //Obtengo una lista de waypoints y ahi es donde creo la tupla booleanos / waypoints, de aca saco los waypoints safe
@@ -276,7 +278,7 @@ public class Bombarder : MonoBehaviour
     }
 
 
-
+    // Final IA-2 - Aggregate - First Or Default - Order By - //
     BaseEnemy TargetEnemy(List<BaseEnemy> possibleTargets)
     {
         var myCol = possibleTargets.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>

@@ -28,6 +28,7 @@ public class BearEnemy : BaseEnemy
 
     private void Start()
     {
+        EnemyManager.instance.spawnedEnemies.Add(this);
         SetupFSMStates();
         
         _query.targetGrid = SpatialGrid.instance;
@@ -257,6 +258,7 @@ public class BearEnemy : BaseEnemy
             _animator.Play("Bear_Death");
             
             EnemyManager.instance.RemoveEnemy(this);
+            EnemyManager.instance.spawnedEnemies.Remove(this);
             Destroy(gameObject, 5f);
         };
 

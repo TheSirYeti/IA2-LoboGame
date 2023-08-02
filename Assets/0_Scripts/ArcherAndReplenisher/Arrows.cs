@@ -19,12 +19,7 @@ public class Arrows : MonoBehaviour
     
     void Start()
     {
-        dirX = Random.Range(-.2f, .2f);
-        dirY = Random.Range(.5f, 1f);
-        dirZ = Random.Range(0.5f, 1.5f);
-        _dir = new Vector3(dirX, dirY, dirZ);
-        transform.forward = _dir;
-        _rb.AddForce(_dir * _arrowSpeed, ForceMode.Acceleration);
+        _rb.AddForce(transform.forward * _arrowSpeed, ForceMode.Acceleration);
         
         Destroy(gameObject, 10f);
     }
@@ -36,6 +31,7 @@ public class Arrows : MonoBehaviour
         if (entity != null && entity.IsEnemy)
         {
             entity.TakeDamage(_damage);
+            Debug.Log("no apunto como maiine");
         }
     }
 }

@@ -9,7 +9,7 @@ using Random = System.Random;
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager instance;
-    List<BaseEnemy> spawnedEnemies = new List<BaseEnemy>();
+    public List<BaseEnemy> spawnedEnemies = new List<BaseEnemy>();
 
     [Header("Wave Properties")] 
     [SerializeField] private float _enemiesPerWave;
@@ -19,6 +19,7 @@ public class EnemyManager : MonoBehaviour
     [SerializeField] private List<GameObject> _enemyPrefabs;
     private int _prefabCount;
     [SerializeField] private List<Transform> _spawnpoints;
+
 
     private void Awake()
     {

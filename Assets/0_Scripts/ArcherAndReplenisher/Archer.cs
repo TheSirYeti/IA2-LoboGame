@@ -24,6 +24,8 @@ public class Archer : MonoBehaviour
 
     [Header("AttackState")]
 
+    [SerializeField] BaseEnemy _target;
+
     //Listas de flechas.
     public List<Arrows> _arrows = new List<Arrows>();//Lista de las flechas.
     [SerializeField] private int _arrowsAmount;
@@ -55,11 +57,14 @@ public class Archer : MonoBehaviour
 
         StateConfigurer.Create(idle)
             .SetTransition(PlayerInputs.ATTACK, attacking)
+            .SetTransition(PlayerInputs.DIE, dying)
+            .SetTransition(PlayerInputs.IDLE, idle)
             .Done();
 
 
         StateConfigurer.Create(reloading)
             .SetTransition(PlayerInputs.DIE, dying)
+            .SetTransition(PlayerInputs.IDLE, idle)
             .SetTransition(PlayerInputs.PANIC, panic)
             .SetTransition(PlayerInputs.ATTACK, attacking)
             .Done();
@@ -87,6 +92,10 @@ public class Archer : MonoBehaviour
         {
             _anim.Play("Idle");
             _restingTimeCounter = _restingTime;
+            if (EnemyManager.instance.spawnedEnemies.Count==0)
+                _target = null;
+            else _target = TargetEnemy(EnemyManager.instance.spawnedEnemies);
+            
         };
 
         idle.OnUpdate += () =>
@@ -94,7 +103,12 @@ public class Archer : MonoBehaviour
             _restingTimeCounter -= Time.deltaTime;
             if (_restingTimeCounter <= 0)
             {
-                SendInputToFSM(PlayerInputs.ATTACK);
+                if(_target != null)
+                    SendInputToFSM(PlayerInputs.ATTACK);
+                else
+                {
+                    SendInputToFSM(PlayerInputs.IDLE);
+                }
             }
 
         };
@@ -122,7 +136,7 @@ public class Archer : MonoBehaviour
                     _arrows = ArrowsCounter(_reloadingArrows).ToList();
                     Debug.Log(_reloadingArrows.Count());
                     _reloadingArrows = DecreasingAmmo(_reloadingArrows, 5).ToList();
-                    SendInputToFSM(PlayerInputs.ATTACK);
+                    SendInputToFSM(PlayerInputs.IDLE);
                 }
                 else SendInputToFSM(PlayerInputs.PANIC);
             }
@@ -140,7 +154,9 @@ public class Archer : MonoBehaviour
         attacking.OnEnter += x =>
         {
             //Debug.Log("entre a attack");
-            
+            Vector3 arrowDir = _target.transform.position - _arrowsSpawner.transform.position;
+            _arrowsSpawner.transform.forward = arrowDir;
+            transform.forward = arrowDir +  new Vector3(0, 3, 0);
             //Cada vez que ataco, elimino las flechas
             if (!_arrows.Any())
                 SendInputToFSM(PlayerInputs.RELOAD);
@@ -150,16 +166,6 @@ public class Archer : MonoBehaviour
 
         };
 
-        attacking.OnUpdate += () =>
-        {
-
-
-        };
-
-        attacking.OnExit += x =>
-        {
-
-        };
 
         panic.OnEnter += x =>
         {
@@ -175,10 +181,6 @@ public class Archer : MonoBehaviour
             }
         };
 
-        panic.OnExit += x =>
-        {
-
-        };
 
 
         dying.OnEnter += x =>
@@ -187,7 +189,7 @@ public class Archer : MonoBehaviour
         };
 
         //Choose first state.
-        _myFsm = new EventFSM<PlayerInputs>(idle);
+        _myFsm = new EventFSM<PlayerInputs>(reloading);
     }
 
 
@@ -231,7 +233,7 @@ public class Archer : MonoBehaviour
             SendInputToFSM(PlayerInputs.RELOAD);
         else
         {
-            var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, transform.rotation);
+            var instantiateBullet = Instantiate(_arrows.FirstOrDefault(), _arrowsSpawner.transform.position, _arrowsSpawner.transform.rotation);
             _arrows = DecreasingAmmo(_arrows, 1).ToList(); //Cuando disparo, baja el ammo de la lista.
 
             SendInputToFSM(PlayerInputs.ATTACK);
@@ -248,5 +250,21 @@ public class Archer : MonoBehaviour
             SendInputToFSM(PlayerInputs.IDLE);
         }
         else SendInputToFSM(PlayerInputs.PANIC);
+    }
+
+    // Final IA-2 - Aggregate - First Or Default - Order By - //
+    BaseEnemy TargetEnemy(List<BaseEnemy> possibleTargets)
+    {
+        var myCol = possibleTargets.Aggregate(new List<Tuple<Vector3, float, BaseEnemy>>(), (acum, current) =>
+        {
+            var dir = current.gameObject.transform.position - transform.position;
+            var tuple = Tuple.Create(dir, dir.magnitude, current);
+            acum.Add(tuple);
+
+            return acum;
+
+        }).OrderBy(x => x.Item2);
+
+        return myCol.FirstOrDefault().Item3;
     }
 }
