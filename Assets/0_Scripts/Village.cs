@@ -52,4 +52,16 @@ public class Village : MonoBehaviour
     {
         winSign.SetActive(true);
     }
+
+    private bool isFastForwarding = false;
+    public void ToggleFastForward()
+    {
+        if (!isFastForwarding)
+        {
+            Time.timeScale = 10f;
+        }
+        else Time.timeScale = 1f;
+
+        isFastForwarding = !isFastForwarding;
+    }
 }

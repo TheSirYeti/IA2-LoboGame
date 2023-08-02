@@ -52,6 +52,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
     {
         var objectsInRange = Physics.OverlapSphere(transform.position, searchRange);
 
+        //IA2-LINQ
         var finalEntity = objectsInRange.Aggregate(FList.Create<IEntity>(), (flist, listObject) =>
         {
             listObject.TryGetComponent(out IEntity entity);
@@ -190,6 +191,7 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
 
             if (stopwatch.ElapsedMilliseconds >= timeSlice)
             {
+                Debug.Log("SLICE");
                 yield return null;
                 stopwatch.Restart();
             }
