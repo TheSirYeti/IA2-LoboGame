@@ -138,13 +138,16 @@ public class Collector : MonoBehaviour, IEntity
                 SendInputToFSM(PlayerInputs.IDLE);
             }
 
-            if (_lootTarget != null)
-                dir = (transform.position - _lootTarget.transform.position).normalized * -1;
+       
         };
 
         looting.OnUpdate += () =>
         {
+            if (_lootTarget != null)
+                dir = (transform.position - _lootTarget.transform.position).normalized * -1;
+
             transform.forward = dir;
+
 
             if (_lootTarget == null || _lootTarget.gameObject == null)
             {
@@ -193,12 +196,12 @@ public class Collector : MonoBehaviour, IEntity
             //BUSCO UN CONTAINER DE PIEDRAS
             _containerTarget = ContainerManager.instance.freeStoneContainers.OrderBy(x => Vector3.Distance(gameObject.transform.position, x.gameObject.transform.position)).FirstOrDefault();
 
-            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
-            transform.forward = dir;
         };
 
         runWithStone.OnUpdate += () =>
         {
+
+            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
             transform.forward = dir;
 
             if (_containerTarget == null)
@@ -223,15 +226,12 @@ public class Collector : MonoBehaviour, IEntity
             //BUSCO UN CONTAINER DE MADERA
             _containerTarget = ContainerManager.instance.freeWoodContainers.OrderBy(x => Vector3.Distance(gameObject.transform.position, x.gameObject.transform.position)).FirstOrDefault();
 
-
-            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
-            transform.forward = dir;
         };
 
         runWithWood.OnUpdate += () =>
         {
+            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
             transform.forward = dir;
-
 
 
             if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToDropLoot) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO

@@ -196,6 +196,7 @@ public class Constructor : MonoBehaviour, IEntity
         runWithStone.OnUpdate += () =>
         {
             Debug.Log("RUN W STONE");
+            dir = (transform.position - _structureTarget.transform.position).normalized * -1;
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
@@ -213,12 +214,12 @@ public class Constructor : MonoBehaviour, IEntity
             _anim.Play("RunWithWood");
             _containerTarget.GetComponent<Container>().OnTakenResource();
 
-            dir = (transform.position - _structureTarget.transform.position).normalized * -1;
         };
 
         runWithWood.OnUpdate += () =>
         {
             Debug.Log("RUN W WOOD");
+            dir = (transform.position - _structureTarget.transform.position).normalized * -1;
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
