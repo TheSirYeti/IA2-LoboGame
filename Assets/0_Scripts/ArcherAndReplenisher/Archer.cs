@@ -140,7 +140,7 @@ public class Archer : MonoBehaviour
         //Attacking
         attacking.OnEnter += x =>
         {
-            Debug.Log("entre a attack");
+            //Debug.Log("entre a attack");
             
             //Cada vez que ataco, elimino las flechas
             if (!_arrows.Any())

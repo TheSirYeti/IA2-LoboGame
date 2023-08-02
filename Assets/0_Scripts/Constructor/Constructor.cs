@@ -279,7 +279,8 @@ public class Constructor : MonoBehaviour, IEntity
 
         dying.OnEnter += x =>
          {
-             Destroy(gameObject);
+             //Destroy(gameObject);
+             gameObject.SetActive(false);
          };
 
         //Choose first state.

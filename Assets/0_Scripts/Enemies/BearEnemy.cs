@@ -102,7 +102,6 @@ public class BearEnemy : BaseEnemy
 
             if (_target == null)
             {
-                Debug.Log("NULLLLLL");
                 _fsm.SendInput(BearInputs.IDLE);
                 return;
             }
@@ -213,7 +212,7 @@ public class BearEnemy : BaseEnemy
                 return;
             }
 
-            if (_target == null)
+            if (_target == null || _target.myGameObject == null)
             {
                 _fsm.SendInput(BearInputs.IDLE);
                 return;
@@ -263,6 +262,11 @@ public class BearEnemy : BaseEnemy
     private void Update()
     {
         _fsm.Update();
+        
+        if (_target != null)
+        {
+            Debug.Log(_target.myGameObject.name + " + " + gameObject.name);
+        }
     }
 
     public override void Attack()

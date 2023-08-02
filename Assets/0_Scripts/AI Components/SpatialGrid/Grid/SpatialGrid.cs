@@ -43,6 +43,8 @@ public class SpatialGrid : MonoBehaviour
             .Select(x => x.GetComponent<IEntity>())
             .Where(x => x != null);
 
+        
+        Debug.Log(ents.Count() + "ASDKASDOLKJISDALIKAJSDk");
         foreach (var e in ents)
         {
             e.OnMove += UpdateEntity;

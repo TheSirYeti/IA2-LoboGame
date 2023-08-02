@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DummyTest : MonoBehaviour, IEntity
 {
-    private float _hp = 15f;
+    [SerializeField] private float _hp = 15f;
 
     public Vector3 Position
     {

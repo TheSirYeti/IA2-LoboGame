@@ -25,6 +25,8 @@ public class Arrows : MonoBehaviour
         _dir = new Vector3(dirX, dirY, dirZ);
         transform.forward = _dir;
         _rb.AddForce(_dir * _arrowSpeed, ForceMode.Acceleration);
+        
+        Destroy(gameObject, 10f);
     }
 
     private void OnTriggerEnter(Collider other)

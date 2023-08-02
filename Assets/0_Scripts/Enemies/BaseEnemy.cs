@@ -55,10 +55,12 @@ public abstract class BaseEnemy : MonoBehaviour, IEntity
         var finalEntity = objectsInRange.Aggregate(FList.Create<IEntity>(), (flist, listObject) =>
         {
             listObject.TryGetComponent(out IEntity entity);
-            
+
             flist = entity != null ? flist + entity : flist;
             return flist;
-        }).OrderBy(x => Vector3.Distance(x.Position, transform.position)).FirstOrDefault();
+        }).Where(x => !x.IsEnemy)
+            .OrderBy(x => Vector3.Distance(x.Position, transform.position))
+            .FirstOrDefault();
 
         return finalEntity;
 

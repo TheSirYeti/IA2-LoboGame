@@ -28,7 +28,11 @@ public class BombLogic : MonoBehaviour
         _stepScale = _speed / distance;
     }
 
-    void Update() {
+    void Update()
+    {
+
+        Debug.Log(query.targetGrid.gameObject.name);
+        
         _progress = Mathf.Min(_progress + Time.deltaTime * _stepScale, 1.0f);
         float parabola = 1.0f - 4.0f * (_progress - 0.5f) * (_progress - 0.5f);
         Vector3 nextPos = Vector3.Lerp(_startPosition, target, _progress);
@@ -42,13 +46,14 @@ public class BombLogic : MonoBehaviour
             var entities = query.Query().Where(x => !x.IsEnemy);
             Debug.Log(entities.Count());
 
-            if (!entities.Any()) return;
-            
-            foreach (var ent in entities)
+            if (entities.Any())
             {
-                ent.TakeDamage(_damage);
+                foreach (var ent in entities)
+                {
+                    ent.TakeDamage(_damage);
+                }
             }
-            
+
             Destroy(gameObject);
         }
     }

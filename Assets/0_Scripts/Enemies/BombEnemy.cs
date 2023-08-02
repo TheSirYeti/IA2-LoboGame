@@ -215,6 +215,7 @@ public class BombEnemy : BaseEnemy
         
         launch.OnUpdate += () =>
         {
+            Debug.Log("SHOOT?");
             if (_hp <= 0)
             {
                 _fsm.SendInput(BombInputs.DIE);
@@ -227,11 +228,11 @@ public class BombEnemy : BaseEnemy
                 return;
             }
             
-            if (_currentAttackCooldown >= 0) return;
-            _fsm.SendInput(BombInputs.SHOOT);
-            
             _currentAttackCooldown -= Time.deltaTime;
             transform.LookAt(new Vector3(_target.Position.x, transform.position.y, _target.Position.z));
+            
+            if (_currentAttackCooldown >= 0) return;
+            _fsm.SendInput(BombInputs.SHOOT);
         };
 
         #endregion
@@ -267,6 +268,11 @@ public class BombEnemy : BaseEnemy
     private void Update()
     {
         _fsm.Update();
+
+        if (_target != null)
+        {
+            Debug.Log(_target.myGameObject.name + " + " + gameObject.name);
+        }
     }
 
     public override void Attack()
@@ -287,6 +293,7 @@ public class BombEnemy : BaseEnemy
         yield return new WaitForSeconds(2f);
         
         _fsm.SendInput(BombInputs.IDLE);
+        Debug.Log("BOMBAAA");
         
         yield return null;
     }

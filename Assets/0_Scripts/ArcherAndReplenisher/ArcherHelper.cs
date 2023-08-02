@@ -88,7 +88,7 @@ public class ArcherHelper : MonoBehaviour
         idle.OnUpdate += () =>
         {
             _anim.Play("Idle");
-            Debug.Log(_myArcher.isPanic);
+            //Debug.Log(_myArcher.isPanic);
             if (_myArcher.isPanic)
             {
                 _isDelivering = true;
