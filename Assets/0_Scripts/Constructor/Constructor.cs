@@ -148,6 +148,12 @@ public class Constructor : MonoBehaviour, IEntity
             else
                 _containerTarget = ContainerManager.instance.takenStoneContainers.OrderBy(x => Vector3.Distance(gameObject.transform.position, x.gameObject.transform.position)).FirstOrDefault();
 
+            if (_containerTarget == null)
+            {
+                SendInputToFSM(PlayerInputs.IDLE);
+                return;
+            }
+                
             dir = (transform.position - _containerTarget.transform.position).normalized * -1;
         };
 

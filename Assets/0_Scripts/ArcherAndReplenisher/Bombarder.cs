@@ -131,16 +131,19 @@ public class Bombarder : MonoBehaviour
 
         destruct.OnUpdate += () =>
         {
-            if(_target == null || _target.gameObject == null)
+            if (_target == null || _target.gameObject == null)
+            {
                 Destroy(gameObject);
-            
+                return;
+            }
+
             Vector3 dir = _target.transform.position - transform.position;
             transform.forward = dir;
             transform.position += transform.forward * _destructionSpeed * Time.deltaTime;
 
             if (dir.magnitude < 0.15f)
             {
-                var enemies = Physics.OverlapSphere(transform.position, 10f)
+                var enemies = Physics.OverlapSphere(transform.position, 5f)
                     .Select(x => x.gameObject.GetComponent<IEntity>())
                     .Where(x => x != null && x.IsEnemy)
                     .ToList();

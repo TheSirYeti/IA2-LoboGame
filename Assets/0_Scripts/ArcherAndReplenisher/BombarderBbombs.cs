@@ -46,7 +46,7 @@ public class BombarderBbombs : MonoBehaviour
         if (collision.gameObject.layer == 9)
         {
             _ps.Play();
-            var enemies = Physics.OverlapSphere(transform.position, 10f)
+            var enemies = Physics.OverlapSphere(transform.position, 5f)
                 .Select(x => x.gameObject.GetComponent<IEntity>())
                 .Where(x => x != null && x.IsEnemy)
                 .ToList();

@@ -133,6 +133,12 @@ public class Collector : MonoBehaviour, IEntity
                 _lootTarget = stoneToLoot;
             }
 
+            if (_lootTarget == null || _lootTarget.gameObject == null)
+            {
+                SendInputToFSM(PlayerInputs.IDLE);
+                return;
+            }
+            
             dir = (transform.position - _lootTarget.transform.position).normalized * -1;
         };
 
@@ -140,8 +146,11 @@ public class Collector : MonoBehaviour, IEntity
         {
             transform.forward = dir;
 
-            if (_lootTarget == null || _lootTarget.gameObject == null) 
+            if (_lootTarget == null || _lootTarget.gameObject == null)
+            {
                 SendInputToFSM(PlayerInputs.IDLE);
+                return;
+            }
 
             if (Vector3.Distance(transform.position, _lootTarget.gameObject.transform.position) > _rangeToLoot) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
             {
