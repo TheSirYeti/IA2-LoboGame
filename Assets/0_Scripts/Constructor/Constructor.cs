@@ -109,7 +109,7 @@ public class Constructor : MonoBehaviour, IEntity
         {
             _restTimer += Time.deltaTime;
 
-
+            Debug.Log("IDLE");
 
             if (buildStage == 0)
             {
@@ -158,6 +158,8 @@ public class Constructor : MonoBehaviour, IEntity
 
         getResource.OnUpdate += () =>
         {
+            Debug.Log("GET");
+            dir = (transform.position - _containerTarget.transform.position).normalized * -1;
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, _containerTarget.gameObject.transform.position) > _rangeToGetResource) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
@@ -193,6 +195,7 @@ public class Constructor : MonoBehaviour, IEntity
 
         runWithStone.OnUpdate += () =>
         {
+            Debug.Log("RUN W STONE");
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
@@ -215,6 +218,7 @@ public class Constructor : MonoBehaviour, IEntity
 
         runWithWood.OnUpdate += () =>
         {
+            Debug.Log("RUN W WOOD");
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, _structureTarget.gameObject.transform.position) > _rangeToBuild) //SI TODAV�A NO ESTOY EN RANGO, SIGO CORRIENDO
@@ -234,6 +238,7 @@ public class Constructor : MonoBehaviour, IEntity
 
         building.OnUpdate += () =>
         {
+            Debug.Log("BUILDING");
             transform.forward = dir;
 
             _buildTimer += Time.deltaTime;
@@ -270,6 +275,8 @@ public class Constructor : MonoBehaviour, IEntity
 
         rest.OnUpdate += () =>
         {
+            Debug.Log("REST");
+            dir = (transform.position - startPos).normalized * -1;
             transform.forward = dir;
 
             if (Vector3.Distance(transform.position, startPos) > 0.5f)
